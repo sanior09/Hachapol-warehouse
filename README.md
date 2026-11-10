@@ -5,7 +5,9 @@
 > 🎓 **หมายเหตุทางวิชาการ (Academic Notice):**  
 > โปรเจกต์นี้จัดทำขึ้นเพื่อการศึกษาและการส่งงานอาจารย์ (Coursework & Academic Project Submission)
 
-🌐 **ลิงก์เข้าชมระบบจริง (Live Website):** [https://hachapol-warehouse.vercel.app/](https://hachapol-warehouse.vercel.app/)
+🌐 **ลิงก์เข้าชมระบบจริง (Live Website):**  
+👉 <a href="https://hachapol-warehouse.vercel.app/" target="_blank" rel="noopener noreferrer"><strong>https://hachapol-warehouse.vercel.app/</strong> ↗</a>  
+*(💡 แนะนำ: กด `Ctrl + คลิก` หรือคลิกลูกกลิ้งเมาส์ที่ลิงก์เพื่อเปิดในแท็บใหม่ทันที)*
 
 ---
 
@@ -43,7 +45,7 @@
 
 ## 🚀 การเปิดใช้งาน (Getting Started)
 
-1. สามารถเข้าใช้งานผ่านเบราว์เซอร์ได้ทันทีที่ [https://hachapol-warehouse.vercel.app/](https://hachapol-warehouse.vercel.app/)
+1. สามารถเข้าใช้งานผ่านเบราว์เซอร์ได้ทันทีที่ 👉 <a href="https://hachapol-warehouse.vercel.app/" target="_blank" rel="noopener noreferrer"><strong>https://hachapol-warehouse.vercel.app/</strong> ↗</a>
 2. หรือเปิดไฟล์ `index.html` บนเครื่องคอมพิวเตอร์ผ่านเว็บเบราว์เซอร์ (Google Chrome, Microsoft Edge) โดยไม่ต้องติดตั้งเซิร์ฟเวอร์
 
 ## 📄 สัญญาอนุญาต (License)
