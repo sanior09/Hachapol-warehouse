@@ -43,8 +43,7 @@
 
 ## 🚀 การเปิดใช้งาน (Getting Started)
 
-1. สามารถเข้าใช้งานผ่านเบราว์เซอร์ได้ทันทีที่ [https://hachapol-warehouse.vercel.app/](https://hachapol-warehouse.vercel.app/)
-2. หรือเปิดไฟล์ `index.html` บนเครื่องคอมพิวเตอร์ผ่านเว็บเบราว์เซอร์ (Google Chrome, Microsoft Edge) โดยไม่ต้องติดตั้งเซิร์ฟเวอร์
+เปิดไฟล์ `index.html` บนเครื่องคอมพิวเตอร์ผ่านเว็บเบราว์เซอร์ (Google Chrome, Microsoft Edge) เพื่อทดสอบแบบ Local โดยไม่ต้องติดตั้งเซิร์ฟเวอร์
 
 ## 📄 สัญญาอนุญาต (License)
 
