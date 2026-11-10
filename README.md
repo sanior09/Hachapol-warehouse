@@ -37,6 +37,7 @@
 │   └── products-data.js   # ฐานข้อมูลสินค้าเริ่มต้น (50 SKUs)
 ├── index.html             # หน้าจอระบบคลังสินค้าหลัก
 ├── .gitignore             # รายการไฟล์ที่ไม่ต้องการให้ Git ติดตาม
+├── LICENSE                # สัญญาอนุญาตซอฟต์แวร์ (MIT License)
 └── README.md              # เอกสารและรายละเอียดโปรเจกต์
 ```
 
@@ -44,3 +45,7 @@
 
 1. สามารถเข้าใช้งานผ่านเบราว์เซอร์ได้ทันทีที่ [https://hachapol-warehouse.vercel.app/](https://hachapol-warehouse.vercel.app/)
 2. หรือเปิดไฟล์ `index.html` บนเครื่องคอมพิวเตอร์ผ่านเว็บเบราว์เซอร์ (Google Chrome, Microsoft Edge) โดยไม่ต้องติดตั้งเซิร์ฟเวอร์
+
+## 📄 สัญญาอนุญาต (License)
+
+โปรเจกต์นี้เผยแพร่ภายใต้เงื่อนไข [MIT License](LICENSE) — Copyright (c) 2026 sanior09
