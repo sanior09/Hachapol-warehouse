@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nachapol Shop — ระบบจัดการสต็อกสินค้าคอมพิวเตอร์และอุปกรณ์ไอทีครบวงจร</title>
-  <!-- Google Fonts: Prompt, Inter, JetBrains Mono -->
+  <!-- Google Fonts: Space Grotesk, Plus Jakarta Sans, Prompt, JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -55,24 +55,24 @@
 
       <!-- Action Toolbar -->
       <div class="flex items-center gap-2">
-        <button onclick="openStockMovementModal(null, 'IN')" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-medium flex items-center gap-1.5 shadow-lg shadow-emerald-600/20 transition">
+        <button onclick="openStockMovementModal(null, 'IN')" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs sm:text-sm font-semibold flex items-center gap-1.5 shadow-lg shadow-emerald-500/25 border border-emerald-400/20 transition">
           <i data-lucide="arrow-down-to-line" class="w-4 h-4"></i>
           <span>รับเข้า / เบิกออก</span>
         </button>
-        <button onclick="openProductModal()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-medium flex items-center gap-1.5 shadow-lg shadow-blue-600/25 transition">
+        <button onclick="openProductModal()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xs sm:text-sm font-semibold flex items-center gap-1.5 shadow-lg shadow-blue-500/25 border border-blue-400/20 transition">
           <i data-lucide="plus-circle" class="w-4 h-4"></i>
           <span>เพิ่มสินค้าใหม่</span>
         </button>
-        <button onclick="exportToCSV()" title="ส่งออกไฟล์ Excel (CSV)" class="p-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+        <button onclick="exportToCSV()" title="ส่งออกไฟล์ Excel (CSV)" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700/80 shadow-sm transition">
           <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
         </button>
-        <button onclick="window.print()" title="พิมพ์รายงานสต็อก" class="p-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+        <button onclick="window.print()" title="พิมพ์รายงานสต็อก" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700/80 shadow-sm transition">
           <i data-lucide="printer" class="w-4 h-4"></i>
         </button>
-        <button onclick="toggleTheme()" id="theme-toggle-btn" title="สลับโหมดมืด/สว่าง" class="p-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+        <button onclick="toggleTheme()" id="theme-toggle-btn" title="สลับโหมดมืด/สว่าง" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700/80 shadow-sm transition">
           <i data-lucide="sun" class="w-4 h-4"></i>
         </button>
-        <button onclick="resetToDefaultData()" title="รีเซ็ตข้อมูลเริ่มต้น 50 ชิ้น" class="p-2.5 rounded-xl bg-slate-800/90 hover:bg-rose-900/60 text-slate-300 hover:text-rose-200 border border-slate-700 transition">
+        <button onclick="resetToDefaultData()" title="รีเซ็ตข้อมูลเริ่มต้น 50 ชิ้น" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-rose-950/60 text-slate-300 hover:text-rose-300 border border-slate-700/80 shadow-sm transition">
           <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
         </button>
       </div>
@@ -85,15 +85,15 @@
     <!-- 1. EXECUTIVE KPI SUMMARY CARDS -->
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
       <!-- Total SKUs & Units -->
-      <div onclick="filterByStatus('ALL')" class="surface-card kpi-card p-4 cursor-pointer">
+      <div onclick="filterByStatus('ALL')" class="kpi-card spotlight-card cursor-pointer">
         <div class="flex items-center justify-between mb-2">
           <span class="text-xs font-medium text-slate-400">รายการสินค้าทั้งหมด</span>
-          <div class="w-8 h-8 rounded-lg bg-blue-500/15 text-blue-400 flex items-center justify-center">
+          <div class="w-8 h-8 rounded-lg bg-blue-500/15 text-blue-400 flex items-center justify-center border border-blue-500/20 shadow-sm shadow-blue-500/20">
             <i data-lucide="boxes" class="w-4 h-4"></i>
           </div>
         </div>
         <div class="flex items-baseline gap-2">
-          <h2 id="kpi-total-skus" class="text-2xl font-bold font-mono-code">50</h2>
+          <h2 id="kpi-total-skus" class="text-2xl font-bold font-mono-code text-white">50</h2>
           <span class="text-xs text-slate-400">รายการ (SKUs)</span>
         </div>
         <p class="text-xs text-slate-400 mt-1.5 flex items-center gap-1">
@@ -104,28 +104,28 @@
       </div>
 
       <!-- Total Inventory Cost Value -->
-      <div class="surface-card kpi-card p-4">
+      <div class="kpi-card spotlight-card">
         <div class="flex items-center justify-between mb-2">
           <span class="text-xs font-medium text-slate-400">มูลค่าสต็อก (ราคาทุน)</span>
-          <div class="w-8 h-8 rounded-lg bg-indigo-500/15 text-indigo-400 flex items-center justify-center">
+          <div class="w-8 h-8 rounded-lg bg-indigo-500/15 text-indigo-400 flex items-center justify-center border border-indigo-500/20 shadow-sm shadow-indigo-500/20">
             <i data-lucide="wallet" class="w-4 h-4"></i>
           </div>
         </div>
-        <h2 id="kpi-cost-value" class="text-xl font-bold font-mono-code text-indigo-400">฿0</h2>
+        <h2 id="kpi-cost-value" class="text-xl font-bold font-mono-code text-indigo-300">฿0</h2>
         <p class="text-xs text-slate-400 mt-1.5">
           ต้นทุนเฉลี่ยต่อชิ้น: <span id="kpi-avg-cost" class="font-mono-code text-slate-300">฿0</span>
         </p>
       </div>
 
       <!-- Total Retail Value & Gross Margin -->
-      <div class="surface-card kpi-card p-4">
+      <div class="kpi-card spotlight-card">
         <div class="flex items-center justify-between mb-2">
           <span class="text-xs font-medium text-slate-400">มูลค่าสต็อก (ราคาขาย)</span>
-          <div class="w-8 h-8 rounded-lg bg-cyan-500/15 text-cyan-400 flex items-center justify-center">
+          <div class="w-8 h-8 rounded-lg bg-cyan-500/15 text-cyan-400 flex items-center justify-center border border-cyan-500/20 shadow-sm shadow-cyan-500/20">
             <i data-lucide="trending-up" class="w-4 h-4"></i>
           </div>
         </div>
-        <h2 id="kpi-retail-value" class="text-xl font-bold font-mono-code text-cyan-400">฿0</h2>
+        <h2 id="kpi-retail-value" class="text-xl font-bold font-mono-code text-cyan-300">฿0</h2>
         <p class="text-xs text-emerald-400 mt-1.5 flex items-center gap-1">
           <span>กำไรคาดการณ์:</span>
           <strong id="kpi-est-profit" class="font-mono-code">+฿0</strong>
@@ -133,10 +133,10 @@
       </div>
 
       <!-- In Stock (Ready) -->
-      <div onclick="filterByStatus('INSTOCK')" class="surface-card kpi-card p-4 cursor-pointer">
+      <div onclick="filterByStatus('INSTOCK')" class="kpi-card spotlight-card cursor-pointer">
         <div class="flex items-center justify-between mb-2">
           <span class="text-xs font-medium text-slate-400">สต็อกปกติ (พร้อมขาย)</span>
-          <div class="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center border border-emerald-500/20 shadow-sm shadow-emerald-500/20">
             <i data-lucide="check-circle-2" class="w-4 h-4"></i>
           </div>
         </div>
@@ -148,10 +148,10 @@
       </div>
 
       <!-- Low Stock Alert -->
-      <div onclick="filterByStatus('LOW')" class="surface-card kpi-card p-4 cursor-pointer border-amber-500/30">
+      <div onclick="filterByStatus('LOW')" class="kpi-card spotlight-card cursor-pointer border-amber-500/30">
         <div class="flex items-center justify-between mb-2">
           <span class="text-xs font-medium text-amber-400">สินค้าใกล้หมด (Low Stock)</span>
-          <div class="w-8 h-8 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center">
+          <div class="w-8 h-8 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center border border-amber-500/30 shadow-sm shadow-amber-500/20">
             <i data-lucide="alert-triangle" class="w-4 h-4"></i>
           </div>
         </div>
@@ -163,10 +163,10 @@
       </div>
 
       <!-- Out of Stock -->
-      <div onclick="filterByStatus('OUT')" class="surface-card kpi-card p-4 cursor-pointer border-rose-500/30">
+      <div onclick="filterByStatus('OUT')" class="kpi-card spotlight-card cursor-pointer border-rose-500/30">
         <div class="flex items-center justify-between mb-2">
           <span class="text-xs font-medium text-rose-400">สินค้าหมด (Out of Stock)</span>
-          <div class="w-8 h-8 rounded-lg bg-rose-500/15 text-rose-400 flex items-center justify-center">
+          <div class="w-8 h-8 rounded-lg bg-rose-500/15 text-rose-400 flex items-center justify-center border border-rose-500/30 shadow-sm shadow-rose-500/20">
             <i data-lucide="x-octagon" class="w-4 h-4"></i>
           </div>
         </div>
@@ -199,7 +199,7 @@
       </div>
 
       <!-- Search, Filters & View Mode Switcher -->
-      <div class="surface-card p-4 no-print">
+      <div class="surface-card spotlight-card p-4 no-print">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
           <!-- Search Box -->
           <div class="md:col-span-4 relative">
@@ -323,7 +323,7 @@
     <div id="main-tab-analytics" class="hidden space-y-6">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <!-- Category Breakdown Valuation -->
-        <div class="lg:col-span-7 surface-card p-5">
+        <div class="lg:col-span-7 surface-card spotlight-card p-5">
           <div class="flex items-center justify-between mb-4">
             <div>
               <h3 class="text-base font-bold flex items-center gap-2">
@@ -339,7 +339,7 @@
         </div>
 
         <!-- Urgent Reorder Watchlist -->
-        <div class="lg:col-span-5 surface-card p-5 flex flex-col justify-between">
+        <div class="lg:col-span-5 surface-card spotlight-card p-5 flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between mb-4">
               <div>
@@ -368,7 +368,7 @@
 
     <!-- ======================= TAB 3: STOCK MOVEMENT HISTORY ======================= -->
     <div id="main-tab-history" class="hidden space-y-4">
-      <div class="surface-card p-5">
+      <div class="surface-card spotlight-card p-5">
         <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
           <div>
             <h3 class="text-base font-bold flex items-center gap-2">

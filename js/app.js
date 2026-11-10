@@ -167,6 +167,22 @@ function renderAll() {
   if (window.lucide) {
     window.lucide.createIcons();
   }
+  initSpotlightTracking();
+}
+
+// Dynamic Mouse Spotlight Tracking
+function initSpotlightTracking() {
+  document.querySelectorAll('.spotlight-card, .kpi-card, .product-grid-card').forEach((card) => {
+    if (card.dataset.spotlightActive === 'true') return;
+    card.dataset.spotlightActive = 'true';
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      card.style.setProperty('--mouse-x', `${x}px`);
+      card.style.setProperty('--mouse-y', `${y}px`);
+    });
+  });
 }
 
 // ======================= 1. KPI DASHBOARD =======================
@@ -227,6 +243,11 @@ function renderCategoryPills() {
       </button>
     `;
   }).join('');
+
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+  initSpotlightTracking();
 }
 
 function populateBrandDropdown() {
@@ -393,31 +414,31 @@ function renderProductsCatalog() {
     const barColor = status.code === 'OUT' ? 'bg-rose-500' : (status.code === 'LOW' ? 'bg-amber-400' : 'bg-emerald-500');
 
     return `
-      <article class="product-grid-card">
+      <article class="product-grid-card spotlight-card">
         <!-- Product Image Header -->
         <div class="product-img-wrapper cursor-pointer" onclick="openDetailModal('${p.id}')">
           <img src="${imgSrc}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="window.handleProductImageError(this, '${p.id}')" />
-          <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+          <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5 z-10">
             <span class="badge-status ${status.badgeClass} shadow-md backdrop-blur-md">
-              <span class="w-1.5 h-1.5 rounded-full ${status.dotColor}"></span>
+              <span class="w-1.5 h-1.5 rounded-full ${status.dotColor} animate-pulse"></span>
               ${status.label}
             </span>
           </div>
-          <div class="absolute top-2.5 right-2.5">
-            <span class="px-2 py-0.5 rounded-md bg-slate-950/85 text-cyan-300 border border-slate-700 text-[11px] font-mono-code font-semibold">
+          <div class="absolute top-2.5 right-2.5 z-10">
+            <span class="px-2.5 py-0.5 rounded-lg bg-slate-950/85 text-cyan-300 border border-slate-700/80 text-[11px] font-mono-code font-semibold shadow-sm">
               📍 ${escapeHtml(p.location)}
             </span>
           </div>
         </div>
 
         <!-- Card Body -->
-        <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
+        <div class="p-4 flex-1 flex flex-col justify-between space-y-3 relative z-10">
           <div>
-            <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1">
-              <span class="font-mono-code font-semibold text-blue-400">${escapeHtml(p.id)}</span>
-              <span>${escapeHtml(p.category)}</span>
+            <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1.5">
+              <span class="font-mono-code font-bold text-blue-400 px-1.5 py-0.5 rounded bg-blue-500/10 border border-blue-500/20">${escapeHtml(p.id)}</span>
+              <span class="px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-300 text-[10px] font-medium border border-slate-700/60">${escapeHtml(p.category)}</span>
             </div>
-            <h3 onclick="openDetailModal('${p.id}')" class="font-semibold text-sm leading-snug line-clamp-2 hover:text-blue-400 cursor-pointer transition" title="${escapeHtml(p.name)}">
+            <h3 onclick="openDetailModal('${p.id}')" class="font-semibold text-sm leading-snug line-clamp-2 hover:text-cyan-400 cursor-pointer transition text-white" title="${escapeHtml(p.name)}">
               ${escapeHtml(p.name)}
             </h3>
             <p class="text-xs text-slate-400 line-clamp-1 mt-1" title="${escapeHtml(p.specs)}">
@@ -429,50 +450,50 @@ function renderProductsCatalog() {
             <!-- Price Row -->
             <div class="flex items-baseline justify-between">
               <div>
-                <span class="text-[11px] text-slate-400 block">ราคาขายหน้าร้าน</span>
-                <span class="text-base font-bold font-mono-code text-cyan-400">${formatCurrency(p.sellPrice)}</span>
+                <span class="text-[10px] uppercase tracking-wider text-slate-400 block font-medium">ราคาขายหน้าร้าน</span>
+                <span class="text-lg font-bold font-mono-code text-cyan-300 drop-shadow-sm">${formatCurrency(p.sellPrice)}</span>
               </div>
               <div class="text-right">
-                <span class="text-[11px] text-slate-400 block">ทุน ${formatCurrency(p.costPrice)}</span>
-                <span class="text-[11px] font-mono-code text-emerald-400">+${formatCurrency(profit)}/ชิ้น</span>
+                <span class="text-[10px] text-slate-400 block">ทุน ${formatCurrency(p.costPrice)}</span>
+                <span class="text-[11px] font-mono-code text-emerald-400 font-semibold">+${formatCurrency(profit)}/ชิ้น</span>
               </div>
             </div>
 
             <!-- Stock Bar & Quick Stepper -->
-            <div class="p-2.5 rounded-xl surface-elevated space-y-1.5">
+            <div class="p-2.5 rounded-xl surface-elevated space-y-1.5 border border-slate-800/80">
               <div class="flex items-center justify-between text-xs">
-                <span class="text-slate-400">คงเหลือ (ขั้นต่ำ ${p.minStock}):</span>
-                <strong class="font-mono-code text-sm ${status.code === 'OUT' ? 'text-rose-400' : (status.code === 'LOW' ? 'text-amber-400' : 'text-white')}">
+                <span class="text-slate-400">คงเหลือ (เตือนขั้นต่ำ ${p.minStock}):</span>
+                <strong class="font-mono-code text-sm ${status.code === 'OUT' ? 'text-rose-400' : (status.code === 'LOW' ? 'text-amber-400' : 'text-emerald-400')}">
                   ${p.stock} ชิ้น
                 </strong>
               </div>
-              <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                <div class="h-full ${barColor} transition-all duration-300" style="width: ${stockPct}%"></div>
+              <div class="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden stock-progress-bar">
+                <div class="h-full ${barColor} transition-all duration-300 rounded-full" style="width: ${stockPct}%"></div>
               </div>
             </div>
 
             <!-- Action Buttons -->
             <div class="flex items-center justify-between gap-1.5 pt-1 no-print">
-              <div class="inline-flex items-center rounded-lg border border-slate-700 overflow-hidden">
-                <button onclick="quickAdjustStock('${p.id}', -1)" title="เบิกออกด่วน 1 ชิ้น" class="px-2.5 py-1.5 bg-slate-800/90 hover:bg-rose-600/30 text-slate-200 text-xs font-bold transition">
+              <div class="inline-flex items-center rounded-lg border border-slate-700/80 bg-slate-900/90 overflow-hidden p-0.5 shadow-sm">
+                <button onclick="quickAdjustStock('${p.id}', -1)" title="เบิกออกด่วน 1 ชิ้น" class="px-2.5 py-1 hover:bg-rose-600/30 text-slate-200 hover:text-rose-300 text-xs font-bold transition rounded-md">
                   -1
                 </button>
-                <button onclick="openStockMovementModal('${p.id}', 'IN')" title="ทำรายการรับเข้า/เบิกออก" class="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-xs font-medium text-emerald-400 border-x border-slate-700 transition">
+                <button onclick="openStockMovementModal('${p.id}', 'IN')" title="ทำรายการรับเข้า/เบิกออก" class="px-2.5 py-1 text-xs font-semibold text-emerald-400 hover:bg-emerald-600/20 border-x border-slate-700/80 transition rounded-none">
                   รับ/เบิก
                 </button>
-                <button onclick="quickAdjustStock('${p.id}', 1)" title="รับเข้าด่วน 1 ชิ้น" class="px-2.5 py-1.5 bg-slate-800/90 hover:bg-emerald-600/30 text-slate-200 text-xs font-bold transition">
+                <button onclick="quickAdjustStock('${p.id}', 1)" title="รับเข้าด่วน 1 ชิ้น" class="px-2.5 py-1 hover:bg-emerald-600/30 text-slate-200 hover:text-emerald-300 text-xs font-bold transition rounded-md">
                   +1
                 </button>
               </div>
 
               <div class="flex items-center gap-1">
-                <button onclick="openDetailModal('${p.id}')" title="ดูรายละเอียด & พิมพ์บาร์โค้ด" class="p-1.5 rounded-lg bg-slate-800/80 hover:bg-blue-600/30 text-slate-300 hover:text-blue-300 transition">
+                <button onclick="openDetailModal('${p.id}')" title="ดูรายละเอียด & พิมพ์บาร์โค้ด" class="p-1.5 rounded-lg bg-slate-800/80 hover:bg-blue-600/30 text-slate-300 hover:text-blue-300 border border-slate-700/50 transition">
                   <i data-lucide="qr-code" class="w-4 h-4"></i>
                 </button>
-                <button onclick="openProductModal('${p.id}')" title="แก้ไขข้อมูลสินค้า" class="p-1.5 rounded-lg bg-slate-800/80 hover:bg-amber-600/30 text-slate-300 hover:text-amber-300 transition">
+                <button onclick="openProductModal('${p.id}')" title="แก้ไขข้อมูลสินค้า" class="p-1.5 rounded-lg bg-slate-800/80 hover:bg-amber-600/30 text-slate-300 hover:text-amber-300 border border-slate-700/50 transition">
                   <i data-lucide="edit-3" class="w-4 h-4"></i>
                 </button>
-                <button onclick="deleteProduct('${p.id}')" title="ลบสินค้า" class="p-1.5 rounded-lg bg-slate-800/80 hover:bg-rose-600/30 text-slate-300 hover:text-rose-300 transition">
+                <button onclick="deleteProduct('${p.id}')" title="ลบสินค้า" class="p-1.5 rounded-lg bg-slate-800/80 hover:bg-rose-600/30 text-slate-300 hover:text-rose-300 border border-slate-700/50 transition">
                   <i data-lucide="trash-2" class="w-4 h-4"></i>
                 </button>
               </div>
@@ -540,6 +561,11 @@ function renderProductsCatalog() {
       </tr>
     `;
   }).join('');
+
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+  initSpotlightTracking();
 }
 
 // ======================= 4. STOCK MOVEMENT & QUICK ADJUST =======================
@@ -1283,6 +1309,11 @@ function renderStockHistory() {
       </tr>
     `;
   }).join('');
+
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+  initSpotlightTracking();
 }
 
 // ======================= 9. NAVIGATION, MODALS & EXPORT =======================
