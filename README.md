@@ -2,29 +2,45 @@
 
 ระบบบริหารจัดการสต็อกสินค้าคอมพิวเตอร์และอุปกรณ์ไอทีครบวงจร (Warehouse Management System)
 
+> 🎓 **หมายเหตุทางวิชาการ (Academic Notice):**  
+> โปรเจกต์นี้จัดทำขึ้นเพื่อการศึกษาและการส่งงานอาจารย์ (Coursework & Academic Project Submission)
+
+🌐 **ลิงก์เข้าชมระบบจริง (Live Website):** [https://hachapol-warehouse.vercel.app/](https://hachapol-warehouse.vercel.app/)
+
+---
+
 ## 🌟 ฟีเจอร์หลัก (Key Features)
 
 - **คลังสินค้าครบวงจร (Product Catalog & Inventory):** จัดการและติดตามสถานะสต็อกสินค้าไอทีกว่า 50 รายการ (SKU-001 ถึง SKU-050)
 - **ระบบวิเคราะห์และการแจ้งเตือน (Analytics & Low Stock Alerts):** แจ้งเตือนสินค้าใกล้หมดสต็อก พร้อมระบบออกใบสั่งซื้อด่วน
 - **ประวัติการทำรายการ (Transaction History):** บันทึกประวัติการรับเข้าและเบิกออกสินค้าแบบเรียลไทม์
 - **Dark Tech UI:** ดีไซน์ทันสมัย ตอบสนองทุกขนาดหน้าจอ (Responsive) ด้วย Tailwind CSS และ Lucide Icons
+- **ระบบจัดเก็บข้อมูล (Local State Management):** รองรับการเพิ่ม ลบ แก้ไข และบันทึกข้อมูลการเปลี่ยนแปลงสต็อก
+
+## 🛠️ เทคโนโลยีที่ใช้ (Tech Stack)
+
+- **Frontend:** HTML5, Modern JavaScript (ES6+), CSS3
+- **Styling & Icons:** Tailwind CSS (CDN), Lucide Icons
+- **Deployment & Hosting:** Vercel (Edge Network)
+- **Version Control:** Git & GitHub
 
 ## 📂 โครงสร้างโปรเจกต์ (Project Structure)
 
 ```
 สต็อกสินค้า/
 ├── css/
-│   └── styles.css          # ไฟล์สไตล์ตกแต่งหน้าตา UI
-├── images/                 # ภาพสินค้า SKU-001 ถึง SKU-050
+│   └── styles.css          # สไตล์ตกแต่ง Dark Tech UI
+├── images/                 # รูปภาพสินค้า SKU-001 ถึง SKU-050
 ├── js/
 │   ├── app.js             # ตรรกะการทำงาน WMS หลัก
-│   ├── image-renderer.js  # ตัวเรนเดอร์ภาพสินค้า
-│   └── products-data.js   # ฐานข้อมูลสต็อกสินค้าเริ่มต้น
-├── index.html             # หน้าจอระบบหลัก
-├── .gitignore             # ไฟล์ยกเว้นสำหรับ Git
-└── README.md              # เอกสารแนะนำโปรเจกต์
+│   ├── image-renderer.js  # ตัวประมวลผลการแสดงผลภาพสินค้า
+│   └── products-data.js   # ฐานข้อมูลสินค้าเริ่มต้น (50 SKUs)
+├── index.html             # หน้าจอระบบคลังสินค้าหลัก
+├── .gitignore             # รายการไฟล์ที่ไม่ต้องการให้ Git ติดตาม
+└── README.md              # เอกสารและรายละเอียดโปรเจกต์
 ```
 
-## 🚀 การเริ่มต้นใช้งาน (Getting Started)
+## 🚀 การเปิดใช้งาน (Getting Started)
 
-เปิดไฟล์ `index.html` ผ่านเว็บเบราว์เซอร์ใดก็ได้ เช่น Google Chrome, Microsoft Edge เพื่อเริ่มใช้งานได้ทันทีโดยไม่ต้องติดตั้งเซิร์ฟเวอร์
+1. สามารถเข้าใช้งานผ่านเบราว์เซอร์ได้ทันทีที่ [https://hachapol-warehouse.vercel.app/](https://hachapol-warehouse.vercel.app/)
+2. หรือเปิดไฟล์ `index.html` บนเครื่องคอมพิวเตอร์ผ่านเว็บเบราว์เซอร์ (Google Chrome, Microsoft Edge) โดยไม่ต้องติดตั้งเซิร์ฟเวอร์
