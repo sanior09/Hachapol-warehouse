@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nachapol Shop — ระบบจัดการสต็อกสินค้าคอมพิวเตอร์และอุปกรณ์ไอทีครบวงจร</title>
+  <!-- Google Fonts: Prompt, Inter, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- ======================= TOP ENTERPRISE NAVBAR ======================= -->
+  <header class="sticky top-0 z-40 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md no-print">
+    <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-4">
+      <!-- Brand Identity -->
+      <div class="flex items-center gap-3.5">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-600/30 border border-white/15">
+          <i data-lucide="cpu" class="w-6 h-6 text-white"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2.5">
+            <h1 class="text-lg sm:text-xl font-bold tracking-tight text-white">Nachapol <span class="text-cyan-400">Shop</span></h1>
+            <span class="px-2 py-0.5 text-[11px] font-semibold rounded-md bg-blue-500/20 text-blue-300 border border-blue-500/30 font-mono-code">WMS v3.5</span>
+          </div>
+          <p class="text-xs text-slate-400 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            Nachapol Shop • ระบบคลังสินค้าคอมพิวเตอร์และอุปกรณ์ไอทีครบวงจร
+          </p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-800">
+        <button onclick="switchMainTab('catalog')" id="tab-btn-catalog" class="main-tab-btn px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center gap-2 transition-all bg-blue-600 text-white shadow">
+          <i data-lucide="package" class="w-4 h-4"></i>
+          <span>คลังสินค้า (<span id="nav-sku-count">50</span>)</span>
+        </button>
+        <button onclick="switchMainTab('analytics')" id="tab-btn-analytics" class="main-tab-btn px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center gap-2 transition-all text-slate-400 hover:text-white">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          <span>วิเคราะห์คลัง & ใบสั่งซื้อด่วน</span>
+          <span id="nav-alert-badge" class="px-1.5 py-0.2 text-[10px] font-bold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">0</span>
+        </button>
+        <button onclick="switchMainTab('history')" id="tab-btn-history" class="main-tab-btn px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center gap-2 transition-all text-slate-400 hover:text-white">
+          <i data-lucide="history" class="w-4 h-4"></i>
+          <span>ประวัติรับเข้า-เบิกออก</span>
+        </button>
+      </nav>
+
+      <!-- Action Toolbar -->
+      <div class="flex items-center gap-2">
+        <button onclick="openStockMovementModal(null, 'IN')" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-medium flex items-center gap-1.5 shadow-lg shadow-emerald-600/20 transition">
+          <i data-lucide="arrow-down-to-line" class="w-4 h-4"></i>
+          <span>รับเข้า / เบิกออก</span>
+        </button>
+        <button onclick="openProductModal()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-medium flex items-center gap-1.5 shadow-lg shadow-blue-600/25 transition">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>เพิ่มสินค้าใหม่</span>
+        </button>
+        <button onclick="exportToCSV()" title="ส่งออกไฟล์ Excel (CSV)" class="p-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+          <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+        </button>
+        <button onclick="window.print()" title="พิมพ์รายงานสต็อก" class="p-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+        </button>
+        <button onclick="toggleTheme()" id="theme-toggle-btn" title="สลับโหมดมืด/สว่าง" class="p-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+          <i data-lucide="sun" class="w-4 h-4"></i>
+        </button>
+        <button onclick="resetToDefaultData()" title="รีเซ็ตข้อมูลเริ่มต้น 50 ชิ้น" class="p-2.5 rounded-xl bg-slate-800/90 hover:bg-rose-900/60 text-slate-300 hover:text-rose-200 border border-slate-700 transition">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ======================= MAIN CONTENT CONTAINER ======================= -->
+  <main class="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+    <!-- 1. EXECUTIVE KPI SUMMARY CARDS -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      <!-- Total SKUs & Units -->
+      <div onclick="filterByStatus('ALL')" class="surface-card kpi-card p-4 cursor-pointer">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-medium text-slate-400">รายการสินค้าทั้งหมด</span>
+          <div class="w-8 h-8 rounded-lg bg-blue-500/15 text-blue-400 flex items-center justify-center">
+            <i data-lucide="boxes" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <h2 id="kpi-total-skus" class="text-2xl font-bold font-mono-code">50</h2>
+          <span class="text-xs text-slate-400">รายการ (SKUs)</span>
+        </div>
+        <p class="text-xs text-slate-400 mt-1.5 flex items-center gap-1">
+          <span>จำนวนรวมในคลัง:</span>
+          <strong id="kpi-total-units" class="text-cyan-400 font-mono-code">0</strong>
+          <span>ชิ้น</span>
+        </p>
+      </div>
+
+      <!-- Total Inventory Cost Value -->
+      <div class="surface-card kpi-card p-4">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-medium text-slate-400">มูลค่าสต็อก (ราคาทุน)</span>
+          <div class="w-8 h-8 rounded-lg bg-indigo-500/15 text-indigo-400 flex items-center justify-center">
+            <i data-lucide="wallet" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <h2 id="kpi-cost-value" class="text-xl font-bold font-mono-code text-indigo-400">฿0</h2>
+        <p class="text-xs text-slate-400 mt-1.5">
+          ต้นทุนเฉลี่ยต่อชิ้น: <span id="kpi-avg-cost" class="font-mono-code text-slate-300">฿0</span>
+        </p>
+      </div>
+
+      <!-- Total Retail Value & Gross Margin -->
+      <div class="surface-card kpi-card p-4">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-medium text-slate-400">มูลค่าสต็อก (ราคาขาย)</span>
+          <div class="w-8 h-8 rounded-lg bg-cyan-500/15 text-cyan-400 flex items-center justify-center">
+            <i data-lucide="trending-up" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <h2 id="kpi-retail-value" class="text-xl font-bold font-mono-code text-cyan-400">฿0</h2>
+        <p class="text-xs text-emerald-400 mt-1.5 flex items-center gap-1">
+          <span>กำไรคาดการณ์:</span>
+          <strong id="kpi-est-profit" class="font-mono-code">+฿0</strong>
+        </p>
+      </div>
+
+      <!-- In Stock (Ready) -->
+      <div onclick="filterByStatus('INSTOCK')" class="surface-card kpi-card p-4 cursor-pointer">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-medium text-slate-400">สต็อกปกติ (พร้อมขาย)</span>
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
+            <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <h2 id="kpi-instock-count" class="text-2xl font-bold font-mono-code text-emerald-400">0</h2>
+          <span class="text-xs text-slate-400">รายการ</span>
+        </div>
+        <p class="text-xs text-slate-400 mt-1.5">คลิกเพื่อกรองสินค้าพร้อมขาย</p>
+      </div>
+
+      <!-- Low Stock Alert -->
+      <div onclick="filterByStatus('LOW')" class="surface-card kpi-card p-4 cursor-pointer border-amber-500/30">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-medium text-amber-400">สินค้าใกล้หมด (Low Stock)</span>
+          <div class="w-8 h-8 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <h2 id="kpi-lowstock-count" class="text-2xl font-bold font-mono-code text-amber-400">0</h2>
+          <span class="text-xs text-slate-400">รายการ</span>
+        </div>
+        <p class="text-xs text-amber-400/90 mt-1.5">ต่ำกว่าจุดสั่งซื้อขั้นต่ำ (Min Stock)</p>
+      </div>
+
+      <!-- Out of Stock -->
+      <div onclick="filterByStatus('OUT')" class="surface-card kpi-card p-4 cursor-pointer border-rose-500/30">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-medium text-rose-400">สินค้าหมด (Out of Stock)</span>
+          <div class="w-8 h-8 rounded-lg bg-rose-500/15 text-rose-400 flex items-center justify-center">
+            <i data-lucide="x-octagon" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <h2 id="kpi-outstock-count" class="text-2xl font-bold font-mono-code text-rose-400">0</h2>
+          <span class="text-xs text-slate-400">รายการ</span>
+        </div>
+        <p class="text-xs text-rose-400/90 mt-1.5">ต้องสั่งซื้อเข้าคลังเร่งด่วน</p>
+      </div>
+    </section>
+
+    <!-- ======================= TAB 1: INVENTORY CATALOG ======================= -->
+    <div id="main-tab-catalog" class="space-y-5">
+
+      <!-- Category Horizontal Selector -->
+      <div class="surface-card p-3.5 no-print">
+        <div class="flex items-center justify-between mb-2.5">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            <i data-lucide="layers" class="w-3.5 h-3.5 text-blue-400"></i>
+            หมวดหมู่สินค้าคอมพิวเตอร์ (10 หมวดหมู่)
+          </span>
+          <button onclick="resetFilters()" class="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1">
+            <i data-lucide="filter-x" class="w-3.5 h-3.5"></i>
+            ล้างตัวกรองทั้งหมด
+          </button>
+        </div>
+        <div id="category-pills-container" class="flex items-center gap-2 overflow-x-auto pb-1">
+          <!-- Populated dynamically by JS -->
+        </div>
+      </div>
+
+      <!-- Search, Filters & View Mode Switcher -->
+      <div class="surface-card p-4 no-print">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+          <!-- Search Box -->
+          <div class="md:col-span-4 relative">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+            <input
+              type="text"
+              id="search-input"
+              oninput="handleFilterChange()"
+              placeholder="ค้นหาชื่อสินค้า, รหัส SKU, บาร์โค้ด, สเปก, ชั้นวาง (เช่น A1-01)..."
+              class="form-input w-full pl-10 pr-8"
+            />
+            <button onclick="clearSearchInput()" id="clear-search-btn" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- Stock Status Filter -->
+          <div class="md:col-span-2">
+            <select id="status-filter" onchange="handleFilterChange()" class="form-input w-full">
+              <option value="ALL">สถานะ: ทั้งหมด</option>
+              <option value="INSTOCK">✅ พร้อมขาย (In Stock)</option>
+              <option value="LOW">⚠️ ใกล้หมด (Low Stock)</option>
+              <option value="OUT">❌ สินค้าหมด (Out of Stock)</option>
+            </select>
+          </div>
+
+          <!-- Brand Filter -->
+          <div class="md:col-span-2">
+            <select id="brand-filter" onchange="handleFilterChange()" class="form-input w-full">
+              <option value="ALL">แบรนด์: ทั้งหมด</option>
+            </select>
+          </div>
+
+          <!-- Sort Selector -->
+          <div class="md:col-span-2">
+            <select id="sort-select" onchange="handleFilterChange()" class="form-input w-full">
+              <option value="SKU_ASC">เรียง: รหัส SKU (001 → 050)</option>
+              <option value="STOCK_ASC">เรียง: สต็อกคงเหลือ (น้อย → มาก)</option>
+              <option value="STOCK_DESC">เรียง: สต็อกคงเหลือ (มาก → น้อย)</option>
+              <option value="PRICE_DESC">เรียง: ราคาขาย (สูง → ต่ำ)</option>
+              <option value="PRICE_ASC">เรียง: ราคาขาย (ต่ำ → สูง)</option>
+              <option value="VALUE_DESC">เรียง: มูลค่ารวมสูงสุด</option>
+              <option value="NAME_ASC">เรียง: ชื่อสินค้า (A → Z)</option>
+            </select>
+          </div>
+
+          <!-- View Switcher (Grid / Table) -->
+          <div class="md:col-span-2 flex items-center justify-end gap-2">
+            <div class="inline-flex rounded-xl p-1 surface-elevated">
+              <button onclick="setViewMode('grid')" id="view-btn-grid" class="px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition bg-blue-600 text-white">
+                <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+                <span>การ์ดรูปภาพ</span>
+              </button>
+              <button onclick="setViewMode('table')" id="view-btn-table" class="px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition text-slate-400 hover:text-white">
+                <i data-lucide="table-2" class="w-3.5 h-3.5"></i>
+                <span>ตารางสต็อก</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results Status Bar -->
+        <div class="mt-3 pt-3 border-t border-slate-800/70 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+          <div class="flex items-center gap-2">
+            <span>กำลังแสดงผล <strong id="showing-count" class="text-white font-mono-code">50</strong> จากทั้งหมด <strong id="total-count" class="text-white font-mono-code">50</strong> รายการ</span>
+            <span class="text-slate-600">|</span>
+            <span>มูลค่ารายการที่กรอง: <strong id="filtered-value" class="text-cyan-400 font-mono-code">฿0</strong></span>
+          </div>
+          <div class="flex items-center gap-3">
+            <button onclick="openReorderPOModal()" class="text-amber-400 hover:text-amber-300 font-medium flex items-center gap-1">
+              <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i>
+              <span>สร้างใบสั่งซื้อสินค้าใกล้หมด/หมดสต็อกอัตโนมัติ</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUCT GRID VIEW -->
+      <div id="products-grid-view" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+        <!-- Rendered dynamically by JS -->
+      </div>
+
+      <!-- PRODUCT TABLE VIEW -->
+      <div id="products-table-view" class="hidden surface-card overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="stock-table">
+            <thead>
+              <tr>
+                <th>สินค้า / รูปประกอบ</th>
+                <th>รหัส SKU / ชั้นวาง</th>
+                <th>หมวดหมู่</th>
+                <th class="text-right">ราคาทุน</th>
+                <th class="text-right">ราคาขาย (กำไร)</th>
+                <th class="text-center">จำนวนคงเหลือ</th>
+                <th class="text-center">สถานะสต็อก</th>
+                <th class="text-right">มูลค่ารวม (ทุน)</th>
+                <th class="text-center no-print">จัดการสต็อก</th>
+              </tr>
+            </thead>
+            <tbody id="products-table-body">
+              <!-- Rendered dynamically by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div id="empty-state" class="hidden surface-card p-12 text-center">
+        <div class="w-16 h-16 rounded-2xl bg-slate-800/80 text-slate-400 flex items-center justify-center mx-auto mb-4">
+          <i data-lucide="package-search" class="w-8 h-8"></i>
+        </div>
+        <h3 class="text-lg font-semibold mb-1">ไม่พบรายการสินค้าที่ตรงกับเงื่อนไขการค้นหา</h3>
+        <p class="text-sm text-slate-400 mb-4">ลองเปลี่ยนคำค้นหา หรือกดล้างตัวกรองเพื่อดูสินค้าทั้ง 50 รายการ</p>
+        <button onclick="resetFilters()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium">
+          แสดงสินค้าทั้งหมด
+        </button>
+      </div>
+    </div>
+
+    <!-- ======================= TAB 2: ANALYTICS & REORDER PO ======================= -->
+    <div id="main-tab-analytics" class="hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Category Breakdown Valuation -->
+        <div class="lg:col-span-7 surface-card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-base font-bold flex items-center gap-2">
+                <i data-lucide="pie-chart" class="w-5 h-5 text-blue-400"></i>
+                <span>สัดส่วนมูลค่าคลังสินค้าและจำนวนชิ้นแยกตามหมวดหมู่</span>
+              </h3>
+              <p class="text-xs text-slate-400 mt-0.5">วิเคราะห์มูลค่าเงินทุนจมและจำนวนสต็อกในแต่ละกลุ่มฮาร์ดแวร์</p>
+            </div>
+          </div>
+          <div id="category-analytics-list" class="space-y-3.5">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Urgent Reorder Watchlist -->
+        <div class="lg:col-span-5 surface-card p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="text-base font-bold text-amber-400 flex items-center gap-2">
+                  <i data-lucide="bell-ring" class="w-5 h-5"></i>
+                  <span>รายการต้องสั่งซื้อเพิ่มด่วน (Reorder Alert)</span>
+                </h3>
+                <p class="text-xs text-slate-400 mt-0.5">สินค้าที่คงเหลือต่ำกว่าจุด Min Stock หรือสินค้าหมด</p>
+              </div>
+              <button onclick="openReorderPOModal()" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-xs flex items-center gap-1.5 transition">
+                <i data-lucide="file-check-2" class="w-4 h-4"></i>
+                <span>ออกใบสั่งซื้อ (PO)</span>
+              </button>
+            </div>
+            <div id="reorder-watchlist-container" class="space-y-2.5 max-h-[430px] overflow-y-auto pr-1">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+            <span>งบประมาณสั่งซื้อเติมสต็อกแนะนำ:</span>
+            <strong id="reorder-total-budget" class="text-base font-bold font-mono-code text-amber-400">฿0</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================= TAB 3: STOCK MOVEMENT HISTORY ======================= -->
+    <div id="main-tab-history" class="hidden space-y-4">
+      <div class="surface-card p-5">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+          <div>
+            <h3 class="text-base font-bold flex items-center gap-2">
+              <i data-lucide="clipboard-list" class="w-5 h-5 text-cyan-400"></i>
+              <span>ประวัติความเคลื่อนไหวสต็อกสินค้า (Stock Movement Audit Log)</span>
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">บันทึกทุกรายการรับสินค้าเข้า (Stock In), เบิกสินค้าออก (Stock Out) และตรวจนับปรับยอด (Audit)</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <select id="history-type-filter" onchange="renderStockHistory()" class="form-input text-xs">
+              <option value="ALL">ทุกประเภทรายการ</option>
+              <option value="IN">📥 รับสินค้าเข้า (Stock In)</option>
+              <option value="OUT">📤 เบิกสินค้าออก (Stock Out)</option>
+              <option value="ADJUST">⚖️ ปรับปรุงยอด (Audit/Adjust)</option>
+            </select>
+            <button onclick="openStockMovementModal(null, 'IN')" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium flex items-center gap-1.5">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>ทำรายการรับเข้า/เบิกออก</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="stock-table">
+            <thead>
+              <tr>
+                <th>เลขที่รายการ / เวลา</th>
+                <th>ประเภท</th>
+                <th>รหัส SKU / ชื่อสินค้า</th>
+                <th class="text-center">ยอดก่อนปรับ</th>
+                <th class="text-center">จำนวนที่เปลี่ยน</th>
+                <th class="text-center">ยอดคงเหลือใหม่</th>
+                <th>สาเหตุ / เอกสารอ้างอิง</th>
+                <th>ผู้ทำรายการ</th>
+              </tr>
+            </thead>
+            <tbody id="stock-history-tbody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ======================= MODAL 1: STOCK IN / OUT / ADJUST ======================= -->
+  <div id="stockModal" class="modal-backdrop">
+    <div class="modal-panel w-full max-w-lg p-6">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h3 class="text-lg font-bold flex items-center gap-2">
+          <i data-lucide="arrow-left-right" class="w-5 h-5 text-emerald-400"></i>
+          <span>ทำรายการรับเข้า / เบิกออกสต็อกสินค้า</span>
+        </h3>
+        <button onclick="closeModal('stockModal')" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="stock-movement-form" onsubmit="submitStockMovement(event)" class="space-y-4 mt-4">
+        <!-- Select Product -->
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1.5">เลือกสินค้า (SKU) *</label>
+          <select id="move-product-select" onchange="updateMovementPreview()" required class="form-input w-full">
+            <!-- Populated by JS -->
+          </select>
+        </div>
+
+        <!-- Selected Product Preview Card -->
+        <div id="move-product-preview" class="p-3 rounded-xl surface-elevated flex items-center gap-3">
+          <img id="move-preview-img" src="" alt="Preview" class="w-16 h-12 rounded-lg object-contain bg-white p-1 border border-slate-700" />
+          <div class="flex-1 min-w-0">
+            <p id="move-preview-name" class="text-xs font-semibold truncate">-</p>
+            <p class="text-xs text-slate-400 mt-0.5">
+              ชั้นวาง: <span id="move-preview-loc" class="font-mono-code text-cyan-400">-</span> |
+              คงเหลือปัจจุบัน: <strong id="move-preview-stock" class="font-mono-code text-white">0</strong> ชิ้น
+            </p>
+          </div>
+        </div>
+
+        <!-- Transaction Type -->
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1.5">ประเภทรายการ *</label>
+          <div class="grid grid-cols-3 gap-2">
+            <label class="cursor-pointer">
+              <input type="radio" name="moveType" value="IN" checked onchange="updateMovementPreview()" class="sr-only peer" />
+              <div class="p-2.5 rounded-xl border border-slate-700 text-center text-xs font-semibold peer-checked:bg-emerald-600/20 peer-checked:border-emerald-500 peer-checked:text-emerald-300 transition">
+                📥 รับสินค้าเข้า (+In)
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="moveType" value="OUT" onchange="updateMovementPreview()" class="sr-only peer" />
+              <div class="p-2.5 rounded-xl border border-slate-700 text-center text-xs font-semibold peer-checked:bg-rose-600/20 peer-checked:border-rose-500 peer-checked:text-rose-300 transition">
+                📤 เบิกสินค้าออก (-Out)
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="moveType" value="SET" onchange="updateMovementPreview()" class="sr-only peer" />
+              <div class="p-2.5 rounded-xl border border-slate-700 text-center text-xs font-semibold peer-checked:bg-blue-600/20 peer-checked:border-blue-500 peer-checked:text-blue-300 transition">
+                ⚖️ กำหนดยอดคงเหลือใหม่
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Quantity & Resulting Stock -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label id="move-qty-label" class="block text-xs font-medium text-slate-300 mb-1.5">จำนวนชิ้น *</label>
+            <input type="number" id="move-qty-input" min="1" value="1" oninput="updateMovementPreview()" required class="form-input w-full font-mono-code text-base font-bold" />
+          </div>
+          <div class="p-3 rounded-xl surface-elevated flex flex-col justify-center">
+            <span class="text-[11px] text-slate-400">ยอดคงเหลือหลังทำรายการ:</span>
+            <strong id="move-after-stock" class="text-xl font-bold font-mono-code text-emerald-400">0 ชิ้น</strong>
+          </div>
+        </div>
+
+        <!-- Reason & Reference Document -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1.5">สาเหตุ / รายละเอียด *</label>
+            <select id="move-reason-select" class="form-input w-full">
+              <option value="รับสินค้าเข้าจากซัพพลายเออร์">รับสินค้าเข้าจากซัพพลายเออร์</option>
+              <option value="เบิกขายหน้าร้าน / ประกอบคอม">เบิกขายหน้าร้าน / ประกอบคอม</option>
+              <option value="เบิกจัดส่งออเดอร์ออนไลน์">เบิกจัดส่งออเดอร์ออนไลน์</option>
+              <option value="ส่งเคลมประกันซัพพลายเออร์ (RMA)">ส่งเคลมประกันซัพพลายเออร์ (RMA)</option>
+              <option value="ตรวจนับปรับปรุงสต็อกประจำเดือน">ตรวจนับปรับปรุงสต็อกประจำเดือน</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1.5">เลขที่เอกสารอ้างอิง (PO / INV)</label>
+            <input type="text" id="move-ref-input" placeholder="เช่น PO-2026-089 หรือ INV-102" class="form-input w-full font-mono-code" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1.5">ผู้ทำรายการ</label>
+          <input type="text" id="move-operator-input" value="สมชาย (เจ้าหน้าที่คลังสินค้า)" required class="form-input w-full" />
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+          <button type="button" onclick="closeModal('stockModal')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium">
+            ยกเลิก
+          </button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5">
+            <i data-lucide="save" class="w-4 h-4"></i>
+            <span>ยืนยันบันทึกรายการสต็อก</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================= MODAL 2: ADD / EDIT PRODUCT ======================= -->
+  <div id="productModal" class="modal-backdrop">
+    <div class="modal-panel w-full max-w-2xl p-6">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h3 id="product-modal-title" class="text-lg font-bold flex items-center gap-2">
+          <i data-lucide="package-plus" class="w-5 h-5 text-blue-400"></i>
+          <span>เพิ่มสินค้าคอมพิวเตอร์ใหม่</span>
+        </h3>
+        <button onclick="closeModal('productModal')" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="product-form" onsubmit="saveProductForm(event)" class="space-y-4 mt-4">
+        <input type="hidden" id="edit-mode-flag" value="false" />
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">รหัสสินค้า (SKU) *</label>
+            <input type="text" id="prod-sku" required class="form-input w-full font-mono-code" placeholder="เช่น SKU-051" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">หมวดหมู่สินค้า *</label>
+            <select id="prod-category" required class="form-input w-full">
+              <option value="CPU">ซีพียู (CPU)</option>
+              <option value="GPU">การ์ดจอ (GPU)</option>
+              <option value="Mainboard">เมนบอร์ด (Mainboard)</option>
+              <option value="RAM">แรม (RAM)</option>
+              <option value="Storage">เอสเอสดี / ฮาร์ดดิสก์ (Storage)</option>
+              <option value="PSU & Cooling">พาวเวอร์ & ชุดน้ำ (PSU & Cooling)</option>
+              <option value="Case">เคสคอมพิวเตอร์ (Case)</option>
+              <option value="Monitor">จอมอนิเตอร์ (Monitor)</option>
+              <option value="Laptop">โน้ตบุ๊ก (Laptop)</option>
+              <option value="Peripherals">เกมมิ่งเกียร์ & เน็ตเวิร์ก (Peripherals)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">แบรนด์ (Brand) *</label>
+            <input type="text" id="prod-brand" required placeholder="เช่น ASUS ROG, Intel, MSI" class="form-input w-full" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-medium text-slate-300 mb-1">ชื่อรุ่นสินค้าแบบเต็ม *</label>
+            <input type="text" id="prod-name" required placeholder="เช่น ASUS ROG Strix GeForce RTX 4080 SUPER 16GB" class="form-input w-full" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">ชื่อย่อบนป้ายภาพ (Short Label)</label>
+            <input type="text" id="prod-short" placeholder="เช่น RTX 4080 SUPER" class="form-input w-full" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">สเปกและรายละเอียดทางเทคนิค (Specifications)</label>
+          <textarea id="prod-specs" rows="2" placeholder="ระบุสเปก เช่น ความเร็วสัญญาณนาฬิกา, ความจุ, พอร์ตเชื่อมต่อ..." class="form-input w-full"></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">ราคาทุน (บาท) *</label>
+            <input type="number" id="prod-cost" min="0" step="1" required oninput="updateMarginPreview()" class="form-input w-full font-mono-code" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">ราคาขาย (บาท) *</label>
+            <input type="number" id="prod-sell" min="0" step="1" required oninput="updateMarginPreview()" class="form-input w-full font-mono-code" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">จำนวนคงเหลือ (ชิ้น) *</label>
+            <input type="number" id="prod-stock" min="0" step="1" required class="form-input w-full font-mono-code" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">จุดเตือนขั้นต่ำ (Min) *</label>
+            <input type="number" id="prod-min" min="0" step="1" value="5" required class="form-input w-full font-mono-code" />
+          </div>
+        </div>
+
+        <div id="margin-calc-box" class="px-3.5 py-2 rounded-xl surface-elevated flex items-center justify-between text-xs">
+          <span class="text-slate-400">กำไรขั้นต้นต่อชิ้น (Gross Margin):</span>
+          <strong id="margin-preview-text" class="font-mono-code text-emerald-400">+฿0 (0.0%)</strong>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">ตำแหน่งคลัง (Bin)</label>
+            <input type="text" id="prod-location" placeholder="เช่น A1-07" class="form-input w-full font-mono-code" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">เลขบาร์โค้ด (EAN-13)</label>
+            <input type="text" id="prod-barcode" placeholder="885900..." class="form-input w-full font-mono-code" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">ซัพพลายเออร์</label>
+            <input type="text" id="prod-supplier" placeholder="เช่น Synnex Thailand" class="form-input w-full" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">การรับประกัน</label>
+            <input type="text" id="prod-warranty" placeholder="เช่น 3 ปี (Synnex)" class="form-input w-full" />
+          </div>
+        </div>
+
+        <!-- Custom Image Upload or URL (Optional - Auto Hardware Render if left blank) -->
+        <div class="p-3.5 rounded-xl surface-elevated space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-medium text-slate-300 flex items-center gap-1.5">
+              <i data-lucide="image" class="w-4 h-4 text-cyan-400"></i>
+              <span>รูปภาพสินค้า (เว้นว่างไว้เพื่อสร้างภาพ Studio Hardware Render อัตโนมัติตามรุ่น)</span>
+            </label>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
+            <input type="text" id="prod-custom-image" placeholder="วางลิงก์รูปภาพ https://... (ถ้ามี)" class="form-input w-full text-xs" />
+            <input type="file" id="prod-image-file" accept="image/*" onchange="handleImageUpload(event)" class="text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600/20 file:text-blue-300 hover:file:bg-blue-600/30" />
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+          <button type="button" onclick="closeModal('productModal')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium">
+            ยกเลิก
+          </button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-1.5">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>บันทึกข้อมูลสินค้า</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================= MODAL 3: PRODUCT DETAIL & BARCODE LABEL ======================= -->
+  <div id="detailModal" class="modal-backdrop">
+    <div class="modal-panel w-full max-w-3xl p-6">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <span id="detail-sku-badge" class="px-2.5 py-1 rounded-lg bg-blue-600/20 text-blue-400 font-mono-code text-xs font-bold border border-blue-500/30">SKU-001</span>
+          <h3 id="detail-title" class="text-base sm:text-lg font-bold line-clamp-1">รายละเอียดสินค้า</h3>
+        </div>
+        <button onclick="closeModal('detailModal')" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div id="detail-modal-content" class="mt-4 space-y-5">
+        <!-- Populated dynamically by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= MODAL 4: AUTO REORDER PURCHASE ORDER (PO) ======================= -->
+  <div id="poModal" class="modal-backdrop">
+    <div class="modal-panel w-full max-w-4xl p-6">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div>
+          <h3 class="text-lg font-bold flex items-center gap-2 text-amber-400">
+            <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
+            <span>ใบขอสั่งซื้อสินค้าเติมคลังอัตโนมัติ (Auto-Reorder Purchase Order)</span>
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">คำนวณรายการสินค้าที่สต็อกหมดและใกล้หมด เพื่อให้สต็อกกลับสู่ระดับปลอดภัย (Safety Stock)</p>
+        </div>
+        <button onclick="closeModal('poModal')" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div id="po-modal-body" class="mt-4 space-y-4">
+        <!-- Populated dynamically by JS -->
+      </div>
+
+      <div class="flex items-center justify-between pt-4 mt-4 border-t border-slate-800">
+        <button onclick="restockAllLowItems()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-lg shadow-emerald-600/25">
+          <i data-lucide="package-check" class="w-4 h-4"></i>
+          <span>กดรับสินค้าเข้าคลังตามใบสั่งซื้อนี้ทั้งหมดทันที (One-Click Restock)</span>
+        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="window.print()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium flex items-center gap-1.5">
+            <i data-lucide="printer" class="w-4 h-4"></i>
+            <span>พิมพ์ใบสั่งซื้อ (PO)</span>
+          </button>
+          <button onclick="closeModal('poModal')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium">
+            ปิดหน้าต่าง
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="no-print"></div>
+
+  <!-- Scripts -->
+  <script src="js/products-data.js"></script>
+  <script src="js/image-renderer.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
+
