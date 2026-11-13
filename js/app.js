@@ -5,7 +5,7 @@
 
 const STORAGE_KEY_PRODUCTS = 'techstock_pro_products_v2';
 const STORAGE_KEY_LOGS = 'techstock_pro_logs_v2';
-const STORAGE_KEY_THEME = 'techstock_pro_theme_v1';
+const STORAGE_KEY_THEME = 'techstock_pro_theme_v2';
 
 let state = {
   products: [],
@@ -142,19 +142,32 @@ function showToast(message, type = 'info') {
 }
 
 // ======================= THEME CONTROLLER =======================
-function initTheme() {
-  const savedTheme = localStorage.getItem(STORAGE_KEY_THEME) || 'dark';
-  if (savedTheme === 'light') {
-    document.documentElement.classList.add('light-mode');
-  } else {
-    document.documentElement.classList.remove('light-mode');
+function syncThemeUI(isDark) {
+  const iconEl = document.getElementById('theme-toggle-icon');
+  if (iconEl) {
+    iconEl.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+  }
+  const metaTheme = document.getElementById('meta-theme-color');
+  if (metaTheme) {
+    metaTheme.setAttribute('content', isDark ? '#000000' : '#f5f5f7');
+  }
+  if (window.lucide) {
+    window.lucide.createIcons();
   }
 }
 
+function initTheme() {
+  const savedTheme = localStorage.getItem(STORAGE_KEY_THEME) || 'light';
+  const isDark = savedTheme === 'dark';
+  document.documentElement.classList.toggle('dark-mode', isDark);
+  syncThemeUI(isDark);
+}
+
 function toggleTheme() {
-  const isLight = document.documentElement.classList.toggle('light-mode');
-  localStorage.setItem(STORAGE_KEY_THEME, isLight ? 'light' : 'dark');
-  showToast(isLight ? 'เปลี่ยนเป็นโหมดสว่าง (Light Mode)' : 'เปลี่ยนเป็นโหมดมืด (Dark Mode)', 'info');
+  const isDark = document.documentElement.classList.toggle('dark-mode');
+  localStorage.setItem(STORAGE_KEY_THEME, isDark ? 'dark' : 'light');
+  syncThemeUI(isDark);
+  showToast(isDark ? 'เปลี่ยนเป็นโหมดมืด (Space Black)' : 'เปลี่ยนเป็นโหมดสว่าง (Apple Daylight)', 'info');
 }
 
 // ======================= MASTER RENDER =======================
@@ -167,22 +180,6 @@ function renderAll() {
   if (window.lucide) {
     window.lucide.createIcons();
   }
-  initSpotlightTracking();
-}
-
-// Dynamic Mouse Spotlight Tracking
-function initSpotlightTracking() {
-  document.querySelectorAll('.spotlight-card, .kpi-card, .product-grid-card').forEach((card) => {
-    if (card.dataset.spotlightActive === 'true') return;
-    card.dataset.spotlightActive = 'true';
-    card.addEventListener('mousemove', (e) => {
-      const rect = card.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      card.style.setProperty('--mouse-x', `${x}px`);
-      card.style.setProperty('--mouse-y', `${y}px`);
-    });
-  });
 }
 
 // ======================= 1. KPI DASHBOARD =======================
@@ -239,7 +236,7 @@ function renderCategoryPills() {
     return `
       <button onclick="selectCategory('${cat.id}')" class="category-pill ${isActive ? 'active' : ''}">
         <span>${escapeHtml(cat.name)}</span>
-        <span class="px-1.5 py-0.5 text-[11px] rounded-md ${isActive ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-300'} font-mono-code">${count}</span>
+        <span class="px-1.5 py-0.5 text-[11px] rounded-full font-mono-code" style="${isActive ? 'background: rgba(128,128,128,0.28);' : 'background: var(--bg-segmented); color: var(--text-secondary);'}">${count}</span>
       </button>
     `;
   }).join('');
@@ -247,7 +244,6 @@ function renderCategoryPills() {
   if (window.lucide) {
     window.lucide.createIcons();
   }
-  initSpotlightTracking();
 }
 
 function populateBrandDropdown() {
@@ -327,13 +323,13 @@ function setViewMode(mode) {
   const tableView = document.getElementById('products-table-view');
 
   if (mode === 'grid') {
-    gridBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition bg-blue-600 text-white';
-    tableBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition text-slate-400 hover:text-white';
+    gridBtn.className = 'apple-segment-btn active';
+    tableBtn.className = 'apple-segment-btn';
     gridView.classList.remove('hidden');
     tableView.classList.add('hidden');
   } else {
-    tableBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition bg-blue-600 text-white';
-    gridBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition text-slate-400 hover:text-white';
+    tableBtn.className = 'apple-segment-btn active';
+    gridBtn.className = 'apple-segment-btn';
     tableView.classList.remove('hidden');
     gridView.classList.add('hidden');
   }
@@ -405,28 +401,29 @@ function renderProductsCatalog() {
     document.getElementById('products-table-view').classList.remove('hidden');
   }
 
-  // Render Grid Cards
+  // Render Grid Cards (Apple Store Tile Aesthetic)
   gridContainer.innerHTML = filtered.map((p) => {
     const status = getStockStatus(p);
     const imgSrc = window.generateProductImageDataUri(p);
     const profit = p.sellPrice - p.costPrice;
     const stockPct = Math.min(100, Math.round((p.stock / Math.max(p.minStock * 3, 15)) * 100));
-    const barColor = status.code === 'OUT' ? 'bg-rose-500' : (status.code === 'LOW' ? 'bg-amber-400' : 'bg-emerald-500');
+    const barColor = status.code === 'OUT' ? 'var(--danger)' : (status.code === 'LOW' ? 'var(--warning)' : 'var(--success)');
+    const stockTextColor = status.code === 'OUT' ? 'var(--danger)' : (status.code === 'LOW' ? 'var(--warning)' : 'var(--success)');
 
     return `
-      <article class="product-grid-card spotlight-card">
+      <article class="product-grid-card">
         <!-- Product Image Header -->
         <div class="product-img-wrapper cursor-pointer" onclick="openDetailModal('${p.id}')">
           <img src="${imgSrc}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="window.handleProductImageError(this, '${p.id}')" />
-          <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5 z-10">
-            <span class="badge-status ${status.badgeClass} shadow-md backdrop-blur-md">
-              <span class="w-1.5 h-1.5 rounded-full ${status.dotColor} animate-pulse"></span>
+          <div class="absolute top-3 left-3 flex items-center gap-1.5 z-10">
+            <span class="badge-status ${status.badgeClass} shadow-sm">
+              <span class="w-1.5 h-1.5 rounded-full ${status.dotColor}"></span>
               ${status.label}
             </span>
           </div>
-          <div class="absolute top-2.5 right-2.5 z-10">
-            <span class="px-2.5 py-0.5 rounded-lg bg-slate-950/85 text-cyan-300 border border-slate-700/80 text-[11px] font-mono-code font-semibold shadow-sm">
-              📍 ${escapeHtml(p.location)}
+          <div class="absolute top-3 right-3 z-10">
+            <span class="px-2.5 py-0.5 rounded-full bg-black/75 text-white text-[11px] font-mono-code font-medium backdrop-blur-md">
+              ${escapeHtml(p.location)}
             </span>
           </div>
         </div>
@@ -434,67 +431,67 @@ function renderProductsCatalog() {
         <!-- Card Body -->
         <div class="p-4 flex-1 flex flex-col justify-between space-y-3 relative z-10">
           <div>
-            <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1.5">
-              <span class="font-mono-code font-bold text-blue-400 px-1.5 py-0.5 rounded bg-blue-500/10 border border-blue-500/20">${escapeHtml(p.id)}</span>
-              <span class="px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-300 text-[10px] font-medium border border-slate-700/60">${escapeHtml(p.category)}</span>
+            <div class="flex items-center justify-between text-[11px] mb-1.5">
+              <span class="font-mono-code font-semibold px-2 py-0.5 rounded-full" style="background: var(--accent-soft); color: var(--accent-primary);">${escapeHtml(p.id)}</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-medium" style="background: var(--bg-elevated); color: var(--text-secondary);">${escapeHtml(p.category)}</span>
             </div>
-            <h3 onclick="openDetailModal('${p.id}')" class="font-semibold text-sm leading-snug line-clamp-2 hover:text-cyan-400 cursor-pointer transition text-white" title="${escapeHtml(p.name)}">
+            <h3 onclick="openDetailModal('${p.id}')" class="font-semibold text-sm leading-snug line-clamp-2 cursor-pointer transition apple-text-main hover:opacity-75" title="${escapeHtml(p.name)}">
               ${escapeHtml(p.name)}
             </h3>
-            <p class="text-xs text-slate-400 line-clamp-1 mt-1" title="${escapeHtml(p.specs)}">
+            <p class="text-xs apple-text-secondary line-clamp-1 mt-1" title="${escapeHtml(p.specs)}">
               ${escapeHtml(p.specs)}
             </p>
           </div>
 
-          <div class="space-y-2.5 pt-2 border-t border-slate-800/80">
+          <div class="space-y-2.5 pt-2.5 border-t apple-border-subtle">
             <!-- Price Row -->
             <div class="flex items-baseline justify-between">
               <div>
-                <span class="text-[10px] uppercase tracking-wider text-slate-400 block font-medium">ราคาขายหน้าร้าน</span>
-                <span class="text-lg font-bold font-mono-code text-cyan-300 drop-shadow-sm">${formatCurrency(p.sellPrice)}</span>
+                <span class="text-[10px] apple-text-muted block font-medium">ราคาขายหน้าร้าน</span>
+                <span class="text-lg font-bold font-mono-code apple-text-main">${formatCurrency(p.sellPrice)}</span>
               </div>
               <div class="text-right">
-                <span class="text-[10px] text-slate-400 block">ทุน ${formatCurrency(p.costPrice)}</span>
-                <span class="text-[11px] font-mono-code text-emerald-400 font-semibold">+${formatCurrency(profit)}/ชิ้น</span>
+                <span class="text-[10px] apple-text-muted block">ทุน ${formatCurrency(p.costPrice)}</span>
+                <span class="text-[11px] font-mono-code font-semibold" style="color: var(--success);">+${formatCurrency(profit)}/ชิ้น</span>
               </div>
             </div>
 
             <!-- Stock Bar & Quick Stepper -->
-            <div class="p-2.5 rounded-xl surface-elevated space-y-1.5 border border-slate-800/80">
+            <div class="p-2.5 rounded-2xl surface-elevated space-y-1.5">
               <div class="flex items-center justify-between text-xs">
-                <span class="text-slate-400">คงเหลือ (เตือนขั้นต่ำ ${p.minStock}):</span>
-                <strong class="font-mono-code text-sm ${status.code === 'OUT' ? 'text-rose-400' : (status.code === 'LOW' ? 'text-amber-400' : 'text-emerald-400')}">
+                <span class="apple-text-secondary">คงเหลือ (ขั้นต่ำ ${p.minStock})</span>
+                <strong class="font-mono-code text-sm" style="color: ${stockTextColor};">
                   ${p.stock} ชิ้น
                 </strong>
               </div>
-              <div class="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden stock-progress-bar">
-                <div class="h-full ${barColor} transition-all duration-300 rounded-full" style="width: ${stockPct}%"></div>
+              <div class="w-full h-1.5 rounded-full overflow-hidden stock-progress-bar">
+                <div class="h-full transition-all duration-300 rounded-full" style="width: ${stockPct}%; background: ${barColor};"></div>
               </div>
             </div>
 
             <!-- Action Buttons -->
             <div class="flex items-center justify-between gap-1.5 pt-1 no-print">
-              <div class="inline-flex items-center rounded-lg border border-slate-700/80 bg-slate-900/90 overflow-hidden p-0.5 shadow-sm">
-                <button onclick="quickAdjustStock('${p.id}', -1)" title="เบิกออกด่วน 1 ชิ้น" class="px-2.5 py-1 hover:bg-rose-600/30 text-slate-200 hover:text-rose-300 text-xs font-bold transition rounded-md">
-                  -1
+              <div class="inline-flex items-center rounded-full p-0.5" style="background: var(--bg-segmented);">
+                <button onclick="quickAdjustStock('${p.id}', -1)" title="เบิกออกด่วน 1 ชิ้น" class="px-2.5 py-1 text-xs font-bold apple-text-main hover:bg-rose-500/15 hover:text-rose-600 rounded-full transition">
+                  −1
                 </button>
-                <button onclick="openStockMovementModal('${p.id}', 'IN')" title="ทำรายการรับเข้า/เบิกออก" class="px-2.5 py-1 text-xs font-semibold text-emerald-400 hover:bg-emerald-600/20 border-x border-slate-700/80 transition rounded-none">
+                <button onclick="openStockMovementModal('${p.id}', 'IN')" title="ทำรายการรับเข้า/เบิกออก" class="px-2.5 py-1 text-xs font-semibold rounded-full transition" style="color: var(--accent-primary);">
                   รับ/เบิก
                 </button>
-                <button onclick="quickAdjustStock('${p.id}', 1)" title="รับเข้าด่วน 1 ชิ้น" class="px-2.5 py-1 hover:bg-emerald-600/30 text-slate-200 hover:text-emerald-300 text-xs font-bold transition rounded-md">
+                <button onclick="quickAdjustStock('${p.id}', 1)" title="รับเข้าด่วน 1 ชิ้น" class="px-2.5 py-1 text-xs font-bold apple-text-main hover:bg-emerald-500/15 hover:text-emerald-600 rounded-full transition">
                   +1
                 </button>
               </div>
 
               <div class="flex items-center gap-1">
-                <button onclick="openDetailModal('${p.id}')" title="ดูรายละเอียด & พิมพ์บาร์โค้ด" class="p-1.5 rounded-lg bg-slate-800/80 hover:bg-blue-600/30 text-slate-300 hover:text-blue-300 border border-slate-700/50 transition">
-                  <i data-lucide="qr-code" class="w-4 h-4"></i>
+                <button onclick="openDetailModal('${p.id}')" title="ดูรายละเอียด & พิมพ์บาร์โค้ด" class="apple-btn-icon w-8 h-8">
+                  <i data-lucide="qr-code" class="w-3.5 h-3.5"></i>
                 </button>
-                <button onclick="openProductModal('${p.id}')" title="แก้ไขข้อมูลสินค้า" class="p-1.5 rounded-lg bg-slate-800/80 hover:bg-amber-600/30 text-slate-300 hover:text-amber-300 border border-slate-700/50 transition">
-                  <i data-lucide="edit-3" class="w-4 h-4"></i>
+                <button onclick="openProductModal('${p.id}')" title="แก้ไขข้อมูลสินค้า" class="apple-btn-icon w-8 h-8">
+                  <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
                 </button>
-                <button onclick="deleteProduct('${p.id}')" title="ลบสินค้า" class="p-1.5 rounded-lg bg-slate-800/80 hover:bg-rose-600/30 text-slate-300 hover:text-rose-300 border border-slate-700/50 transition">
-                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                <button onclick="deleteProduct('${p.id}')" title="ลบสินค้า" class="apple-btn-icon w-8 h-8 hover:text-rose-600">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                 </button>
               </div>
             </div>
@@ -510,37 +507,38 @@ function renderProductsCatalog() {
     const imgSrc = window.generateProductImageDataUri(p);
     const profit = p.sellPrice - p.costPrice;
     const totalVal = p.costPrice * p.stock;
+    const stockColor = status.code === 'OUT' ? 'var(--danger)' : (status.code === 'LOW' ? 'var(--warning)' : 'var(--text-main)');
 
     return `
       <tr>
         <td>
           <div class="flex items-center gap-3">
-            <img onclick="openDetailModal('${p.id}')" src="${imgSrc}" alt="${escapeHtml(p.name)}" onerror="window.handleProductImageError(this, '${p.id}')" class="w-16 h-12 rounded-lg object-contain bg-white p-1 border border-slate-700 cursor-pointer shrink-0" />
+            <img onclick="openDetailModal('${p.id}')" src="${imgSrc}" alt="${escapeHtml(p.name)}" onerror="window.handleProductImageError(this, '${p.id}')" class="w-16 h-12 rounded-xl object-contain bg-white p-1 border apple-border-subtle cursor-pointer shrink-0" />
             <div class="min-w-0 max-w-md">
-              <div onclick="openDetailModal('${p.id}')" class="font-semibold text-sm hover:text-blue-400 cursor-pointer truncate" title="${escapeHtml(p.name)}">
+              <div onclick="openDetailModal('${p.id}')" class="font-semibold text-sm cursor-pointer truncate apple-text-main hover:opacity-75" title="${escapeHtml(p.name)}">
                 ${escapeHtml(p.name)}
               </div>
-              <div class="text-xs text-slate-400 truncate mt-0.5">
-                แบรนด์: <span class="text-slate-300 font-medium">${escapeHtml(p.brand)}</span> • ประกัน: ${escapeHtml(p.warranty)}
+              <div class="text-xs apple-text-secondary truncate mt-0.5">
+                แบรนด์: <span class="font-medium apple-text-main">${escapeHtml(p.brand)}</span> • ประกัน: ${escapeHtml(p.warranty)}
               </div>
             </div>
           </div>
         </td>
         <td>
-          <div class="font-mono-code font-bold text-xs text-blue-400">${escapeHtml(p.id)}</div>
-          <div class="text-xs text-slate-400 font-mono-code mt-0.5">📍 ชั้นวาง: ${escapeHtml(p.location)}</div>
+          <div class="font-mono-code font-semibold text-xs apple-accent-text">${escapeHtml(p.id)}</div>
+          <div class="text-xs apple-text-secondary font-mono-code mt-0.5">${escapeHtml(p.location)}</div>
         </td>
         <td>
-          <span class="px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 text-xs font-medium">${escapeHtml(p.category)}</span>
+          <span class="px-2.5 py-1 rounded-full text-xs font-medium" style="background: var(--bg-elevated); color: var(--text-secondary);">${escapeHtml(p.category)}</span>
         </td>
-        <td class="text-right font-mono-code text-slate-300">${formatCurrency(p.costPrice)}</td>
+        <td class="text-right font-mono-code apple-text-secondary">${formatCurrency(p.costPrice)}</td>
         <td class="text-right">
-          <div class="font-mono-code font-bold text-cyan-400">${formatCurrency(p.sellPrice)}</div>
-          <div class="text-[11px] font-mono-code text-emerald-400">+${formatCurrency(profit)}</div>
+          <div class="font-mono-code font-bold apple-text-main">${formatCurrency(p.sellPrice)}</div>
+          <div class="text-[11px] font-mono-code font-medium" style="color: var(--success);">+${formatCurrency(profit)}</div>
         </td>
         <td class="text-center">
-          <div class="font-mono-code text-base font-bold ${status.code === 'OUT' ? 'text-rose-400' : (status.code === 'LOW' ? 'text-amber-400' : 'text-white')}">${p.stock}</div>
-          <div class="text-[11px] text-slate-400">ขั้นต่ำ ${p.minStock}</div>
+          <div class="font-mono-code text-base font-bold" style="color: ${stockColor};">${p.stock}</div>
+          <div class="text-[11px] apple-text-muted">ขั้นต่ำ ${p.minStock}</div>
         </td>
         <td class="text-center">
           <span class="badge-status ${status.badgeClass}">
@@ -548,14 +546,14 @@ function renderProductsCatalog() {
             ${status.label}
           </span>
         </td>
-        <td class="text-right font-mono-code font-semibold">${formatCurrency(totalVal)}</td>
+        <td class="text-right font-mono-code font-semibold apple-text-main">${formatCurrency(totalVal)}</td>
         <td class="text-center no-print">
           <div class="inline-flex items-center gap-1">
-            <button onclick="quickAdjustStock('${p.id}', -1)" class="px-2 py-1 rounded bg-slate-800 hover:bg-rose-600/30 text-xs font-bold">-1</button>
-            <button onclick="openStockMovementModal('${p.id}', 'IN')" class="px-2 py-1 rounded bg-emerald-600/20 text-emerald-300 hover:bg-emerald-600/30 text-xs font-semibold">รับ/เบิก</button>
-            <button onclick="quickAdjustStock('${p.id}', 1)" class="px-2 py-1 rounded bg-slate-800 hover:bg-emerald-600/30 text-xs font-bold">+1</button>
-            <button onclick="openDetailModal('${p.id}')" title="บาร์โค้ด/รายละเอียด" class="p-1.5 rounded bg-slate-800 hover:bg-blue-600/30 text-slate-300"><i data-lucide="qr-code" class="w-3.5 h-3.5"></i></button>
-            <button onclick="openProductModal('${p.id}')" title="แก้ไข" class="p-1.5 rounded bg-slate-800 hover:bg-amber-600/30 text-slate-300"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+            <button onclick="quickAdjustStock('${p.id}', -1)" class="px-2.5 py-1 rounded-full text-xs font-bold" style="background: var(--bg-segmented);">−1</button>
+            <button onclick="openStockMovementModal('${p.id}', 'IN')" class="px-2.5 py-1 rounded-full text-xs font-semibold" style="background: var(--accent-soft); color: var(--accent-primary);">รับ/เบิก</button>
+            <button onclick="quickAdjustStock('${p.id}', 1)" class="px-2.5 py-1 rounded-full text-xs font-bold" style="background: var(--bg-segmented);">+1</button>
+            <button onclick="openDetailModal('${p.id}')" title="บาร์โค้ด/รายละเอียด" class="apple-btn-icon w-7 h-7"><i data-lucide="qr-code" class="w-3.5 h-3.5"></i></button>
+            <button onclick="openProductModal('${p.id}')" title="แก้ไข" class="apple-btn-icon w-7 h-7"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
           </div>
         </td>
       </tr>
@@ -565,7 +563,6 @@ function renderProductsCatalog() {
   if (window.lucide) {
     window.lucide.createIcons();
   }
-  initSpotlightTracking();
 }
 
 // ======================= 4. STOCK MOVEMENT & QUICK ADJUST =======================
@@ -650,17 +647,18 @@ function updateMovementPreview() {
   if (moveType === 'IN') {
     qtyLabel.textContent = 'จำนวนที่รับเข้า (ชิ้น) *';
     resultingStock = product.stock + qty;
-    afterEl.className = 'text-xl font-bold font-mono-code text-emerald-400';
+    afterEl.className = 'text-xl font-bold font-mono-code';
+    afterEl.style.color = 'var(--success)';
   } else if (moveType === 'OUT') {
     qtyLabel.textContent = 'จำนวนที่เบิกออก (ชิ้น) *';
     resultingStock = product.stock - qty;
-    afterEl.className = resultingStock < 0
-      ? 'text-xl font-bold font-mono-code text-rose-500'
-      : 'text-xl font-bold font-mono-code text-amber-400';
+    afterEl.className = 'text-xl font-bold font-mono-code';
+    afterEl.style.color = resultingStock < 0 ? 'var(--danger)' : 'var(--warning)';
   } else {
     qtyLabel.textContent = 'ระบุยอดคงเหลือจริงที่ตรวจนับได้ *';
     resultingStock = qty;
-    afterEl.className = 'text-xl font-bold font-mono-code text-blue-400';
+    afterEl.className = 'text-xl font-bold font-mono-code';
+    afterEl.style.color = 'var(--accent-primary)';
   }
 
   afterEl.textContent = `${resultingStock} ชิ้น`;
@@ -806,7 +804,8 @@ function updateMarginPreview() {
 
   const el = document.getElementById('margin-preview-text');
   el.textContent = `${profit >= 0 ? '+' : ''}${formatCurrency(profit)} (${pct}%)`;
-  el.className = profit >= 0 ? 'font-mono-code text-emerald-400' : 'font-mono-code text-rose-400';
+  el.className = 'font-mono-code';
+  el.style.color = profit >= 0 ? 'var(--success)' : 'var(--danger)';
 }
 
 function handleImageUpload(event) {
@@ -985,20 +984,20 @@ function openDetailModal(sku) {
     <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
       <!-- Image & Shelf Barcode Label -->
       <div class="md:col-span-5 space-y-3">
-        <div class="rounded-xl overflow-hidden border border-slate-700 bg-white p-3 flex items-center justify-center min-h-[220px]">
+        <div class="rounded-2xl overflow-hidden border apple-border-subtle bg-white p-4 flex items-center justify-center min-h-[220px]">
           <img src="${imgSrc}" alt="${escapeHtml(p.name)}" onerror="window.handleProductImageError(this, '${p.id}')" class="w-full max-h-[260px] object-contain" />
         </div>
 
         <!-- Printable Shelf Barcode Tag -->
-        <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-700 space-y-2">
+        <div class="p-3.5 rounded-2xl surface-elevated space-y-2">
           <div class="flex items-center justify-between text-xs">
-            <span class="font-semibold text-slate-300">🏷️ ป้ายบาร์โค้ดติดชั้นวาง (Shelf Label)</span>
-            <span class="font-mono-code text-cyan-400">BIN: ${escapeHtml(p.location)}</span>
+            <span class="font-semibold apple-text-secondary">ป้ายบาร์โค้ดชั้นวาง (Shelf Label)</span>
+            <span class="font-mono-code apple-accent-text font-semibold">BIN: ${escapeHtml(p.location)}</span>
           </div>
           ${generateBarcodeSvg(p.barcode)}
           <div class="flex items-center justify-between text-xs pt-1">
-            <span class="font-bold text-white truncate max-w-[160px]">${escapeHtml(p.shortModel || p.name)}</span>
-            <span class="font-mono-code font-bold text-emerald-400 text-sm">${formatCurrency(p.sellPrice)}</span>
+            <span class="font-bold apple-text-main truncate max-w-[160px]">${escapeHtml(p.shortModel || p.name)}</span>
+            <span class="font-mono-code font-bold text-sm" style="color: var(--success);">${formatCurrency(p.sellPrice)}</span>
           </div>
         </div>
       </div>
@@ -1007,56 +1006,56 @@ function openDetailModal(sku) {
       <div class="md:col-span-7 space-y-4">
         <div class="flex flex-wrap items-center gap-2">
           <span class="badge-status ${status.badgeClass}">${status.label} (คงเหลือ ${p.stock} ชิ้น)</span>
-          <span class="px-2.5 py-1 rounded-full text-xs bg-slate-800 text-slate-300">หมวดหมู่: ${escapeHtml(p.category)}</span>
-          <span class="px-2.5 py-1 rounded-full text-xs bg-slate-800 text-slate-300">แบรนด์: ${escapeHtml(p.brand)}</span>
+          <span class="px-2.5 py-1 rounded-full text-xs surface-elevated apple-text-secondary">หมวดหมู่: ${escapeHtml(p.category)}</span>
+          <span class="px-2.5 py-1 rounded-full text-xs surface-elevated apple-text-secondary">แบรนด์: ${escapeHtml(p.brand)}</span>
         </div>
 
-        <div class="p-3.5 rounded-xl surface-elevated space-y-1.5">
-          <div class="text-xs font-semibold text-slate-400">สเปกและรายละเอียดสินค้า (Specifications)</div>
-          <p class="text-sm text-slate-200 leading-relaxed">${escapeHtml(p.specs)}</p>
+        <div class="p-3.5 rounded-2xl surface-elevated space-y-1.5">
+          <div class="text-xs font-semibold apple-text-secondary">สเปกและรายละเอียดสินค้า</div>
+          <p class="text-sm apple-text-main leading-relaxed">${escapeHtml(p.specs)}</p>
         </div>
 
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          <div class="p-3 rounded-xl surface-elevated">
-            <span class="text-[11px] text-slate-400 block">ราคาทุนต่อชิ้น</span>
-            <strong class="text-base font-bold font-mono-code text-slate-200">${formatCurrency(p.costPrice)}</strong>
+          <div class="p-3 rounded-2xl surface-elevated">
+            <span class="text-[11px] apple-text-secondary block">ราคาทุนต่อชิ้น</span>
+            <strong class="text-base font-bold font-mono-code apple-text-main">${formatCurrency(p.costPrice)}</strong>
           </div>
-          <div class="p-3 rounded-xl surface-elevated">
-            <span class="text-[11px] text-slate-400 block">ราคาขายหน้าร้าน</span>
-            <strong class="text-base font-bold font-mono-code text-cyan-400">${formatCurrency(p.sellPrice)}</strong>
+          <div class="p-3 rounded-2xl surface-elevated">
+            <span class="text-[11px] apple-text-secondary block">ราคาขายหน้าร้าน</span>
+            <strong class="text-base font-bold font-mono-code apple-accent-text">${formatCurrency(p.sellPrice)}</strong>
           </div>
-          <div class="p-3 rounded-xl surface-elevated">
-            <span class="text-[11px] text-slate-400 block">กำไรต่อชิ้น (Margin)</span>
-            <strong class="text-base font-bold font-mono-code text-emerald-400">+${formatCurrency(profit)} (${marginPct}%)</strong>
+          <div class="p-3 rounded-2xl surface-elevated">
+            <span class="text-[11px] apple-text-secondary block">กำไรต่อชิ้น</span>
+            <strong class="text-base font-bold font-mono-code" style="color: var(--success);">+${formatCurrency(profit)} (${marginPct}%)</strong>
           </div>
-          <div class="p-3 rounded-xl surface-elevated">
-            <span class="text-[11px] text-slate-400 block">มูลค่าสต็อกรวม (ทุน)</span>
-            <strong class="text-sm font-bold font-mono-code text-indigo-400">${formatCurrency(p.costPrice * p.stock)}</strong>
+          <div class="p-3 rounded-2xl surface-elevated">
+            <span class="text-[11px] apple-text-secondary block">มูลค่าสต็อก (ทุน)</span>
+            <strong class="text-sm font-bold font-mono-code apple-text-main">${formatCurrency(p.costPrice * p.stock)}</strong>
           </div>
-          <div class="p-3 rounded-xl surface-elevated">
-            <span class="text-[11px] text-slate-400 block">ซัพพลายเออร์</span>
-            <strong class="text-xs font-semibold text-slate-200 truncate block">${escapeHtml(p.supplier)}</strong>
+          <div class="p-3 rounded-2xl surface-elevated">
+            <span class="text-[11px] apple-text-secondary block">ซัพพลายเออร์</span>
+            <strong class="text-xs font-semibold apple-text-main truncate block">${escapeHtml(p.supplier)}</strong>
           </div>
-          <div class="p-3 rounded-xl surface-elevated">
-            <span class="text-[11px] text-slate-400 block">การรับประกัน</span>
-            <strong class="text-xs font-semibold text-slate-200">${escapeHtml(p.warranty)}</strong>
+          <div class="p-3 rounded-2xl surface-elevated">
+            <span class="text-[11px] apple-text-secondary block">การรับประกัน</span>
+            <strong class="text-xs font-semibold apple-text-main">${escapeHtml(p.warranty)}</strong>
           </div>
         </div>
 
         <!-- Recent History for this SKU -->
         <div class="space-y-2">
-          <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400">ประวัติความเคลื่อนไหวล่าสุดของ ${escapeHtml(p.id)}</h4>
+          <h4 class="text-xs font-semibold uppercase tracking-wider apple-text-secondary">ประวัติความเคลื่อนไหวล่าสุดของ ${escapeHtml(p.id)}</h4>
           ${productLogs.length === 0 ? `
-            <p class="text-xs text-slate-500 italic">ยังไม่มีประวัติการเคลื่อนไหวเพิ่มเติม</p>
+            <p class="text-xs apple-text-muted italic">ยังไม่มีประวัติการเคลื่อนไหวเพิ่มเติม</p>
           ` : `
             <div class="space-y-1.5">
               ${productLogs.map((l) => `
-                <div class="px-3 py-2 rounded-lg surface-elevated flex items-center justify-between text-xs">
+                <div class="px-3 py-2 rounded-xl surface-elevated flex items-center justify-between text-xs">
                   <div>
-                    <span class="font-mono-code text-slate-400">${escapeHtml(l.timestamp)}</span>
-                    <span class="ml-2 text-slate-200">${escapeHtml(l.reason)}</span>
+                    <span class="font-mono-code apple-text-muted">${escapeHtml(l.timestamp)}</span>
+                    <span class="ml-2 apple-text-main">${escapeHtml(l.reason)}</span>
                   </div>
-                  <span class="font-mono-code font-bold ${l.qtyChange >= 0 ? 'text-emerald-400' : 'text-rose-400'}">
+                  <span class="font-mono-code font-bold" style="color: ${l.qtyChange >= 0 ? 'var(--success)' : 'var(--danger)'};">
                     ${l.qtyChange >= 0 ? '+' + l.qtyChange : l.qtyChange} ชิ้น (→ ${l.newStock})
                   </span>
                 </div>
@@ -1065,18 +1064,18 @@ function openDetailModal(sku) {
           `}
         </div>
 
-        <div class="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-slate-800 no-print">
-          <button onclick="closeModal('detailModal'); openStockMovementModal('${p.id}', 'IN');" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5">
+        <div class="flex flex-wrap items-center justify-end gap-2 pt-3 border-t apple-border-subtle no-print">
+          <button onclick="closeModal('detailModal'); openStockMovementModal('${p.id}', 'IN');" class="apple-btn-primary px-4 py-2 text-xs flex items-center gap-1.5">
             <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
-            <span>รับเข้า / เบิกออกสินค้านี้</span>
+            <span>รับเข้า / เบิกออก</span>
           </button>
-          <button onclick="closeModal('detailModal'); openProductModal('${p.id}');" class="px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs font-semibold flex items-center gap-1.5">
+          <button onclick="closeModal('detailModal'); openProductModal('${p.id}');" class="apple-btn-secondary px-4 py-2 text-xs flex items-center gap-1.5">
             <i data-lucide="edit-3" class="w-4 h-4"></i>
             <span>แก้ไขข้อมูล</span>
           </button>
-          <button onclick="window.print()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium flex items-center gap-1.5">
+          <button onclick="window.print()" class="apple-btn-secondary px-4 py-2 text-xs flex items-center gap-1.5">
             <i data-lucide="printer" class="w-4 h-4"></i>
-            <span>พิมพ์ป้ายบาร์โค้ด</span>
+            <span>พิมพ์บาร์โค้ด</span>
           </button>
         </div>
       </div>
@@ -1105,18 +1104,18 @@ function renderAnalyticsAndReorder() {
   }).sort((a, b) => b.costVal - a.costVal);
 
   catContainer.innerHTML = catStats.map((c) => `
-    <div class="p-3 rounded-xl surface-elevated space-y-1.5">
+    <div class="p-3.5 rounded-2xl surface-elevated space-y-2">
       <div class="flex items-center justify-between text-xs">
-        <div class="font-semibold text-slate-200 flex items-center gap-2">
+        <div class="font-semibold apple-text-main flex items-center gap-2">
           <span>${escapeHtml(c.name)}</span>
-          <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-mono-code">${c.skuCount} รุ่น • ${c.units} ชิ้น</span>
+          <span class="px-2 py-0.5 rounded-full text-[11px] font-mono-code" style="background: var(--bg-segmented); color: var(--text-secondary);">${c.skuCount} รุ่น • ${c.units} ชิ้น</span>
         </div>
-        <div class="font-mono-code font-bold text-cyan-400">
-          ${formatCurrency(c.costVal)} <span class="text-slate-400 font-normal">(${c.pct}%)</span>
+        <div class="font-mono-code font-bold apple-accent-text">
+          ${formatCurrency(c.costVal)} <span class="apple-text-secondary font-normal">(${c.pct}%)</span>
         </div>
       </div>
-      <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-        <div class="h-full bg-gradient-to-r from-blue-600 to-cyan-400 rounded-full" style="width: ${Math.max(3, c.pct)}%"></div>
+      <div class="w-full h-2 rounded-full overflow-hidden" style="background: var(--bg-segmented);">
+        <div class="h-full rounded-full" style="width: ${Math.max(3, c.pct)}%; background: var(--accent-primary);"></div>
       </div>
     </div>
   `).join('');
@@ -1130,8 +1129,8 @@ function renderAnalyticsAndReorder() {
 
   if (alertItems.length === 0) {
     watchContainer.innerHTML = `
-      <div class="p-8 text-center text-slate-400">
-        <p class="text-sm font-semibold text-emerald-400">🎉 สินค้าทุกรายการมีสต็อกอยู่ในเกณฑ์ปลอดภัย</p>
+      <div class="p-8 text-center apple-text-secondary">
+        <p class="text-sm font-semibold" style="color: var(--success);">สินค้าทุกรายการมีสต็อกอยู่ในเกณฑ์ปลอดภัย</p>
       </div>
     `;
   } else {
@@ -1142,18 +1141,18 @@ function renderAnalyticsAndReorder() {
       totalBudget += estCost;
 
       return `
-        <div class="p-3 rounded-xl surface-elevated flex items-center justify-between gap-3 border-l-4 ${p.stock === 0 ? 'border-l-rose-500' : 'border-l-amber-400'}">
+        <div class="p-3 rounded-2xl surface-elevated flex items-center justify-between gap-3 border-l-4 ${p.stock === 0 ? 'border-l-rose-500' : 'border-l-amber-400'}">
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2">
-              <span class="font-mono-code text-xs font-bold text-blue-400">${escapeHtml(p.id)}</span>
-              <span class="text-xs px-2 py-0.2 rounded-full ${p.stock === 0 ? 'bg-rose-500/20 text-rose-300' : 'bg-amber-500/20 text-amber-300'} font-semibold">
+              <span class="font-mono-code text-xs font-bold apple-accent-text">${escapeHtml(p.id)}</span>
+              <span class="text-xs px-2 py-0.5 rounded-full font-semibold" style="background: ${p.stock === 0 ? 'var(--danger-soft)' : 'var(--warning-soft)'}; color: ${p.stock === 0 ? 'var(--danger)' : 'var(--warning)'};">
                 เหลือ ${p.stock} / ขั้นต่ำ ${p.minStock}
               </span>
             </div>
-            <p class="text-xs font-semibold truncate mt-1">${escapeHtml(p.name)}</p>
-            <p class="text-[11px] text-slate-400">ซัพพลายเออร์: ${escapeHtml(p.supplier)} • แนะนำสั่งเพิ่ม <strong class="text-emerald-400">+${orderQty} ชิ้น</strong></p>
+            <p class="text-xs font-semibold truncate mt-1 apple-text-main">${escapeHtml(p.name)}</p>
+            <p class="text-[11px] apple-text-secondary">ซัพพลายเออร์: ${escapeHtml(p.supplier)} • แนะนำสั่งเพิ่ม <strong style="color: var(--success);">+${orderQty} ชิ้น</strong></p>
           </div>
-          <button onclick="openStockMovementModal('${p.id}', 'IN')" class="px-3 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white text-xs font-semibold shrink-0 transition">
+          <button onclick="openStockMovementModal('${p.id}', 'IN')" class="apple-btn-primary px-3 py-1.5 text-xs shrink-0">
             + รับเข้า
           </button>
         </div>
@@ -1173,7 +1172,7 @@ function openReorderPOModal() {
   let grandTotal = 0;
 
   if (alertItems.length === 0) {
-    body.innerHTML = `<div class="p-8 text-center text-emerald-400 font-semibold">ไม่มีสินค้าที่ต่ำกว่าจุดสั่งซื้อขั้นต่ำในขณะนี้</div>`;
+    body.innerHTML = `<div class="p-8 text-center font-semibold" style="color: var(--success);">ไม่มีสินค้าที่ต่ำกว่าจุดสั่งซื้อขั้นต่ำในขณะนี้</div>`;
   } else {
     const rows = alertItems.map((p, idx) => {
       const targetStock = Math.max(p.minStock * 2, p.minStock + 5);
@@ -1184,26 +1183,26 @@ function openReorderPOModal() {
       return `
         <tr>
           <td class="text-center font-mono-code">${idx + 1}</td>
-          <td class="font-mono-code font-bold text-blue-400">${escapeHtml(p.id)}</td>
+          <td class="font-mono-code font-bold apple-accent-text">${escapeHtml(p.id)}</td>
           <td>
-            <div class="font-semibold text-xs">${escapeHtml(p.name)}</div>
-            <div class="text-[11px] text-slate-400">ตัวแทนจำหน่าย: ${escapeHtml(p.supplier)}</div>
+            <div class="font-semibold text-xs apple-text-main">${escapeHtml(p.name)}</div>
+            <div class="text-[11px] apple-text-secondary">ตัวแทนจำหน่าย: ${escapeHtml(p.supplier)}</div>
           </td>
-          <td class="text-center font-mono-code text-rose-400 font-bold">${p.stock} / ${p.minStock}</td>
-          <td class="text-center font-mono-code text-emerald-400 font-bold">+${orderQty} ชิ้น</td>
+          <td class="text-center font-mono-code font-bold" style="color: var(--danger);">${p.stock} / ${p.minStock}</td>
+          <td class="text-center font-mono-code font-bold" style="color: var(--success);">+${orderQty} ชิ้น</td>
           <td class="text-right font-mono-code">${formatCurrency(p.costPrice)}</td>
-          <td class="text-right font-mono-code font-bold text-cyan-400">${formatCurrency(lineTotal)}</td>
+          <td class="text-right font-mono-code font-bold apple-accent-text">${formatCurrency(lineTotal)}</td>
         </tr>
       `;
     }).join('');
 
     body.innerHTML = `
-      <div class="p-3.5 rounded-xl surface-elevated flex flex-wrap items-center justify-between gap-2 text-xs">
-        <div>เลขที่ใบขอซื้อ: <strong class="font-mono-code text-white">PO-AUTO-${new Date().toISOString().slice(0,10).replace(/-/g,'')}</strong></div>
-        <div>จำนวนรายการที่ต้องสั่งซื้อ: <strong class="text-amber-400">${alertItems.length} รายการ</strong></div>
-        <div>ยอดรวมงบประมาณสั่งซื้อ: <strong class="text-base font-mono-code text-emerald-400">${formatCurrency(grandTotal)}</strong></div>
+      <div class="p-3.5 rounded-2xl surface-elevated flex flex-wrap items-center justify-between gap-2 text-xs apple-text-secondary">
+        <div>เลขที่ใบขอซื้อ: <strong class="font-mono-code apple-text-main">PO-AUTO-${new Date().toISOString().slice(0,10).replace(/-/g,'')}</strong></div>
+        <div>จำนวนรายการที่ต้องสั่งซื้อ: <strong style="color: var(--warning);">${alertItems.length} รายการ</strong></div>
+        <div>ยอดรวมงบประมาณสั่งซื้อ: <strong class="text-base font-mono-code" style="color: var(--success);">${formatCurrency(grandTotal)}</strong></div>
       </div>
-      <div class="overflow-x-auto border border-slate-800 rounded-xl">
+      <div class="overflow-x-auto border apple-border-subtle rounded-2xl">
         <table class="stock-table">
           <thead>
             <tr>
@@ -1270,42 +1269,42 @@ function renderStockHistory() {
   const filteredLogs = state.logs.filter((l) => filterType === 'ALL' || l.type === filterType);
 
   if (filteredLogs.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-400">ไม่พบประวัติการทำรายการสต็อก</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 apple-text-secondary">ไม่พบประวัติการทำรายการสต็อก</td></tr>`;
     return;
   }
 
   tbody.innerHTML = filteredLogs.map((l) => {
     let typeBadge = '';
     if (l.type === 'IN') {
-      typeBadge = `<span class="badge-status badge-instock">📥 รับเข้า (IN)</span>`;
+      typeBadge = `<span class="badge-status badge-instock">รับเข้า (IN)</span>`;
     } else if (l.type === 'OUT') {
-      typeBadge = `<span class="badge-status badge-outstock">📤 เบิกออก (OUT)</span>`;
+      typeBadge = `<span class="badge-status badge-outstock">เบิกออก (OUT)</span>`;
     } else {
-      typeBadge = `<span class="badge-status badge-lowstock">⚖️ ปรับยอด (ADJ)</span>`;
+      typeBadge = `<span class="badge-status badge-lowstock">ปรับยอด (ADJ)</span>`;
     }
 
     const changeSign = l.qtyChange > 0 ? `+${l.qtyChange}` : `${l.qtyChange}`;
-    const changeColor = l.qtyChange > 0 ? 'text-emerald-400' : (l.qtyChange < 0 ? 'text-rose-400' : 'text-slate-300');
+    const changeColor = l.qtyChange > 0 ? 'var(--success)' : (l.qtyChange < 0 ? 'var(--danger)' : 'var(--text-secondary)');
 
     return `
       <tr>
         <td>
-          <div class="font-mono-code font-bold text-xs text-slate-200">${escapeHtml(l.id)}</div>
-          <div class="font-mono-code text-[11px] text-slate-400">${escapeHtml(l.timestamp)}</div>
+          <div class="font-mono-code font-bold text-xs apple-text-main">${escapeHtml(l.id)}</div>
+          <div class="font-mono-code text-[11px] apple-text-secondary">${escapeHtml(l.timestamp)}</div>
         </td>
         <td>${typeBadge}</td>
         <td>
-          <div class="font-mono-code text-xs text-blue-400 font-bold">${escapeHtml(l.sku)}</div>
-          <div class="text-xs font-medium truncate max-w-xs">${escapeHtml(l.productName)}</div>
+          <div class="font-mono-code text-xs apple-accent-text font-bold">${escapeHtml(l.sku)}</div>
+          <div class="text-xs font-medium truncate max-w-xs apple-text-main">${escapeHtml(l.productName)}</div>
         </td>
-        <td class="text-center font-mono-code text-slate-400">${l.prevStock}</td>
-        <td class="text-center font-mono-code font-bold ${changeColor}">${changeSign}</td>
-        <td class="text-center font-mono-code font-bold text-white">${l.newStock}</td>
+        <td class="text-center font-mono-code apple-text-secondary">${l.prevStock}</td>
+        <td class="text-center font-mono-code font-bold" style="color: ${changeColor};">${changeSign}</td>
+        <td class="text-center font-mono-code font-bold apple-text-main">${l.newStock}</td>
         <td>
-          <div class="text-xs text-slate-200">${escapeHtml(l.reason)}</div>
-          <div class="text-[11px] font-mono-code text-cyan-400">Ref: ${escapeHtml(l.reference)}</div>
+          <div class="text-xs apple-text-main">${escapeHtml(l.reason)}</div>
+          <div class="text-[11px] font-mono-code apple-accent-text">Ref: ${escapeHtml(l.reference)}</div>
         </td>
-        <td class="text-xs text-slate-300">${escapeHtml(l.operator)}</td>
+        <td class="text-xs apple-text-secondary">${escapeHtml(l.operator)}</td>
       </tr>
     `;
   }).join('');
@@ -1313,7 +1312,6 @@ function renderStockHistory() {
   if (window.lucide) {
     window.lucide.createIcons();
   }
-  initSpotlightTracking();
 }
 
 // ======================= 9. NAVIGATION, MODALS & EXPORT =======================
@@ -1326,10 +1324,10 @@ function switchMainTab(tabName) {
     const btn = document.getElementById(`tab-btn-${t}`);
     if (t === tabName) {
       section.classList.remove('hidden');
-      btn.className = 'main-tab-btn px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center gap-2 transition-all bg-blue-600 text-white shadow';
+      btn.className = 'apple-segment-btn active';
     } else {
       section.classList.add('hidden');
-      btn.className = 'main-tab-btn px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center gap-2 transition-all text-slate-400 hover:text-white';
+      btn.className = 'apple-segment-btn';
     }
   });
 
